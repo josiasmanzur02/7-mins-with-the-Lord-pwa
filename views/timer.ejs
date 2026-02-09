@@ -1,0 +1,37 @@
+<%- include('partials/header') %>
+
+<div class="card timer-card">
+  <div>
+    <p class="muted">Focused time</p>
+    <h1 class="title step-title">Calling on the Lord</h1>
+    <div class="timer-display">07:00</div>
+    <div class="controls">
+      <button id="pause-btn">Pause</button>
+      <button id="back-btn" class="ghost">Back</button>
+      <button id="exit-btn" class="ghost">Exit</button>
+    </div>
+    <div class="verse muted"></div>
+    <p class="muted" id="status"></p>
+  </div>
+
+  <div>
+    <div class="step-item active" style="margin-bottom: 10px;">
+      <div>Progress</div>
+      <div class="progress-text">1 / <%= steps.length %></div>
+    </div>
+    <ul class="step-list">
+      <% steps.forEach((s) => { %>
+        <li class="step-item">
+          <span><%= s.label %></span>
+          <span class="muted"><%= s.seconds %>s</span>
+        </li>
+      <% }) %>
+    </ul>
+    <p class="muted" style="margin-top:12px;">Tip: stay with the short timer; it keeps the flow moving.</p>
+  </div>
+</div>
+
+<script>
+  window.STEPS = <%- JSON.stringify(steps) %>;
+</script>
+<%- include('partials/footer', { pageScript: '/js/timer.js' }) %>

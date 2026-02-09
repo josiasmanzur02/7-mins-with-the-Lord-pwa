@@ -1,0 +1,17 @@
+{
+  "name": "7 Minutes with the Lord",
+  "short_name": "7 Minutes",
+  "start_url": "/home",
+  "display": "standalone",
+  "scope": "/",
+  "background_color": "#0f766e",
+  "theme_color": "#0f766e",
+  "icons": [
+    {
+      "src": "/icons/logo.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any"
+    }
+  ]
+}

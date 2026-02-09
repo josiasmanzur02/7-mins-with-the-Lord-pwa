@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="<%= (currentUser && currentUser.theme) || 'light' %>">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" href="/icons/logo.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#0f766e" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=DM+Sans:wght@400;500&display=swap" />
+    <link rel="stylesheet" href="/css/style.css" />
+    <title>7 Minutes with the Lord</title>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="logo-dot"></span>
+          <span class="brand-name">7 Minutes</span>
+        </div>
+        <% if (currentUser) { %>
+          <nav class="nav">
+            <a href="/home">Home</a>
+            <a href="/timer">Start</a>
+            <a href="/settings">Settings</a>
+            <a href="/install">Install</a>
+            <form method="POST" action="/auth/logout" class="inline-form">
+              <button type="submit" class="ghost">Log out</button>
+            </form>
+          </nav>
+        <% } %>
+      </header>
+
+      <% if (flash) { %>
+        <div class="flash <%= flash.type %>"><%= flash.message %></div>
+      <% } %>
+
+      <main>

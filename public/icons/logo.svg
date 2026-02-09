@@ -1,0 +1,11 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="7 Minutes icon">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop stop-color="#0f766e" offset="0%"/>
+      <stop stop-color="#f97316" offset="100%"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="url(#g)"/>
+  <text x="50%" y="55%" text-anchor="middle" font-family="Space Grotesk, Arial, sans-serif" font-size="220" font-weight="700" fill="#ffffff">7</text>
+  <circle cx="360" cy="160" r="46" fill="rgba(255,255,255,0.14)"/>
+</svg>

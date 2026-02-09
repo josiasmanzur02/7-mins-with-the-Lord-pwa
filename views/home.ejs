@@ -1,0 +1,36 @@
+<%- include('partials/header') %>
+
+<div class="grid two">
+  <div class="card">
+    <p class="muted">Welcome back</p>
+    <h1 class="title">Stay consistent with the Lord</h1>
+    <div class="streak">
+      🔥 <%= streak %> days
+      <span class="pill">Current streak</span>
+    </div>
+    <% if (lastCheck) { %>
+      <p class="muted">Last time: <%= lastCheck %> <%= checkedToday ? '(today)' : '' %></p>
+    <% } else { %>
+      <p class="muted">No sessions yet. Today is a great day to start.</p>
+    <% } %>
+    <div class="controls" style="margin-top: 12px;">
+      <a class="cta" href="/timer">Start 7 minutes</a>
+      <a class="ghost" href="/install">Install on phone</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>How it works</h3>
+    <ul class="step-list">
+      <li class="step-item">1. Calling on the Lord</li>
+      <li class="step-item">2. Pray</li>
+      <li class="step-item">3. Pray-Read</li>
+      <li class="step-item">4. Confession</li>
+      <li class="step-item">5. Consecration</li>
+      <li class="step-item">6. Give Thanks</li>
+      <li class="step-item">7. Petition</li>
+    </ul>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

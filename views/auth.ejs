@@ -1,0 +1,40 @@
+<%- include('partials/header') %>
+
+<div class="auth-container card">
+  <div class="tabs">
+    <a class="tab <%= tab === 'login' ? 'active' : '' %>" href="/auth?tab=login">Log in</a>
+    <a class="tab <%= tab === 'signup' ? 'active' : '' %>" href="/auth?tab=signup">Sign up</a>
+  </div>
+
+  <% if (tab === 'signup') { %>
+    <form class="stack" method="POST" action="/auth/signup">
+      <div>
+        <label for="name">Name</label>
+        <input required id="name" name="name" placeholder="Your name" />
+      </div>
+      <div>
+        <label for="email">Email</label>
+        <input required id="email" name="email" type="email" placeholder="you@example.com" />
+      </div>
+      <div>
+        <label for="password">Password</label>
+        <input required id="password" name="password" type="password" minlength="6" />
+      </div>
+      <button type="submit">Create account</button>
+    </form>
+  <% } else { %>
+    <form class="stack" method="POST" action="/auth/login">
+      <div>
+        <label for="email">Email</label>
+        <input required id="email" name="email" type="email" placeholder="you@example.com" />
+      </div>
+      <div>
+        <label for="password">Password</label>
+        <input required id="password" name="password" type="password" />
+      </div>
+      <button type="submit">Log in</button>
+    </form>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

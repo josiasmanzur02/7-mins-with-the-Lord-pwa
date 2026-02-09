@@ -1,0 +1,25 @@
+# Dependencies
+node_modules
+
+# Environment / secrets
+.env
+.env.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor / OS
+.DS_Store
+.vscode/
+
+# Build artifacts
+dist
+.parcel-cache
+.vercel
+
+# Local data
+data/app.db
+data/sessions.sqlite
