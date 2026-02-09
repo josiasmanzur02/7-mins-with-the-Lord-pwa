@@ -11,13 +11,13 @@
   const statusEl = document.getElementById('status');
 
   const verses = [
-    { ref: 'Romans 10:13', text: 'For whosoever shall call upon the name of the Lord shall be saved.', link: 'https://text.recoveryversion.bible/RcV.htm?reference=Romans%2010:13' },
-    { ref: 'Philippians 4:6', text: 'In every thing by prayer and supplication with thanksgiving let your requests be made known unto God.', link: 'https://text.recoveryversion.bible/RcV.htm?reference=Philippians%204:6' },
-    { ref: 'Jeremiah 15:16', text: 'Thy words were found, and I did eat them; and thy word was unto me the joy and rejoicing of mine heart.', link: 'https://text.recoveryversion.bible/RcV.htm?reference=Jeremiah%2015:16' },
-    { ref: '1 John 1:9', text: 'If we confess our sins, he is faithful and just to forgive us our sins.', link: 'https://text.recoveryversion.bible/RcV.htm?reference=1%20John%201:9' },
-    { ref: 'Romans 12:1', text: 'Present your bodies a living sacrifice, holy, acceptable unto God.', link: 'https://text.recoveryversion.bible/RcV.htm?reference=Romans%2012:1' },
-    { ref: '1 Thessalonians 5:18', text: 'In every thing give thanks: for this is the will of God in Christ Jesus concerning you.', link: 'https://text.recoveryversion.bible/RcV.htm?reference=1%20Thessalonians%205:18' },
-    { ref: 'Matthew 7:7', text: 'Ask, and it shall be given you; seek, and ye shall find; knock, and it shall be opened unto you.', link: 'https://text.recoveryversion.bible/RcV.htm?reference=Matthew%207:7' },
+    { ref: 'Romans 10:13', text: 'For “whoever calls upon the name of the Lord shall be saved.”', link: 'https://text.recoveryversion.bible/RcV.htm?reference=Romans%2010:13' },
+    { ref: 'Philippians 4:6', text: 'In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God;', link: 'https://text.recoveryversion.bible/RcV.htm?reference=Philippians%204:6' },
+    { ref: 'Jeremiah 15:16', text: 'Your words were found and I ate them, / And Your word became to me / The gladness and joy of my heart, / For I am called by Your name, / O Jehovah, God of hosts.', link: 'https://text.recoveryversion.bible/RcV.htm?reference=Jeremiah%2015:16' },
+    { ref: '1 John 1:9', text: 'If we confess our sins, He is faithful and righteous to forgive us our sins and cleanse us from all unrighteousness.', link: 'https://text.recoveryversion.bible/RcV.htm?reference=1%20John%201:9' },
+    { ref: 'Romans 12:1', text: 'I exhort you therefore, brothers, through the compassions of God to present your bodies a living sacrifice, holy, well pleasing to God, which is your reasonable service.', link: 'https://text.recoveryversion.bible/RcV.htm?reference=Romans%2012:1' },
+    { ref: '1 Thessalonians 5:18', text: 'In everything give thanks; for this is the will of God in Christ Jesus for you.', link: 'https://text.recoveryversion.bible/RcV.htm?reference=1%20Thessalonians%205:18' },
+    { ref: 'Matthew 7:7', text: 'Ask and it shall be given to you; seek and you shall find; knock and it shall be opened to you.', link: 'https://text.recoveryversion.bible/RcV.htm?reference=Matthew%207:7' },
   ];
 
   let index = 0;
