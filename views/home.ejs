@@ -2,11 +2,11 @@
 
 <div class="grid two">
   <div class="card">
-    <p class="muted">Welcome back</p>
-    <h1 class="title">Stay consistent with the Lord</h1>
+    <p class="muted"><%= t('brand') %></p>
+    <h1 class="title"><%= t('home_title') %></h1>
     <div class="streak">
-      🔥 <%= streak %> days
-      <span class="pill">Current streak</span>
+      🔥 <%= streak %> <%= lang === 'es' ? 'días' : 'days' %>
+      <span class="pill"><%= t('home_subtitle') %></span>
     </div>
     <% if (lastCheck) { %>
       <p class="muted">Last time: <%= lastCheck %> <%= checkedToday ? '(today)' : '' %></p>
@@ -14,21 +14,21 @@
       <p class="muted">No sessions yet. Today is a great day to start.</p>
     <% } %>
     <div class="controls" style="margin-top: 12px;">
-      <a class="cta" href="/timer">Start 7 minutes</a>
-      <a class="ghost" href="/install">Install on phone</a>
+      <a class="cta" href="/timer"><%= t('home_cta_start') %></a>
+      <a class="ghost" href="/install"><%= t('home_cta_install') %></a>
     </div>
   </div>
 
   <div class="card">
-    <h3>How it works</h3>
+    <h3><%= t('how_it_works') %></h3>
     <ul class="step-list">
-      <li class="step-item">1. Calling on the Lord</li>
-      <li class="step-item">2. Pray</li>
-      <li class="step-item">3. Pray-Read</li>
-      <li class="step-item">4. Confession</li>
-      <li class="step-item">5. Consecration</li>
-      <li class="step-item">6. Give Thanks</li>
-      <li class="step-item">7. Petition</li>
+      <li class="step-item">1. <%= t('step_calling') %></li>
+      <li class="step-item">2. <%= t('step_pray') %></li>
+      <li class="step-item">3. <%= t('step_pray_read') %></li>
+      <li class="step-item">4. <%= t('step_confession') %></li>
+      <li class="step-item">5. <%= t('step_consecration') %></li>
+      <li class="step-item">6. <%= t('step_thanks') %></li>
+      <li class="step-item">7. <%= t('step_petition') %></li>
     </ul>
   </div>
 </div>

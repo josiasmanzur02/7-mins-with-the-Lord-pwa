@@ -3,7 +3,7 @@
   const verseBox = document.querySelector('.verse');
   const titleEl = document.querySelector('.step-title');
   const timerEl = document.querySelector('.timer-display');
-  const listItems = Array.from(document.querySelectorAll('.step-item'));
+  const listItems = Array.from(document.querySelectorAll('.step-row'));
   const pauseBtn = document.getElementById('pause-btn');
   const backBtn = document.getElementById('back-btn');
   const exitBtn = document.getElementById('exit-btn');

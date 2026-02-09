@@ -10,14 +10,14 @@
 }
 
 [data-theme='dark'] {
-  --bg: #0b1220;
-  --surface: #111827;
-  --text: #e5e7eb;
-  --muted: #94a3b8;
-  --primary: #22d3ee;
-  --primary-strong: #0891b2;
-  --accent: #f59e0b;
-  --shadow: 0 20px 60px rgba(34, 211, 238, 0.12);
+  --bg: #0c1726;
+  --surface: #111f30;
+  --text: #e8f0fb;
+  --muted: #9eb6cc;
+  --primary: #38bdf8;
+  --primary-strong: #0ea5e9;
+  --accent: #fbbf24;
+  --shadow: 0 20px 60px rgba(14, 165, 233, 0.12);
 }
 
 *,
@@ -69,6 +69,16 @@ body {
   display: flex;
   align-items: center;
   gap: 14px;
+}
+
+.nav-toggle {
+  display: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 22px;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 118, 110, 0.14);
 }
 
 .nav a {
@@ -214,7 +224,7 @@ form select {
   padding: 12px 14px;
   border-radius: 12px;
   border: 1px solid rgba(15, 118, 110, 0.14);
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface);
   color: var(--text);
   font-size: 15px;
 }
@@ -228,6 +238,27 @@ form select:focus {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.input-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.toggle-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  font-weight: 700;
+  color: var(--primary-strong);
+}
+
+.toggle-row input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
 }
 
 .streak {
@@ -256,20 +287,20 @@ form select:focus {
   gap: 16px;
 }
 
-@media (max-width: 900px) {
-  .timer-card {
-    grid-template-columns: 1fr;
-  }
-  .nav {
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-}
-
 .timer-display {
   font-size: 70px;
   font-weight: 800;
   margin: 12px 0;
+}
+
+.progress-box {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(15, 118, 110, 0.1);
+  background: var(--surface);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .step-list {
@@ -280,17 +311,17 @@ form select:focus {
   gap: 10px;
 }
 
-.step-item {
+.step-row {
   padding: 12px 14px;
   border-radius: 12px;
   border: 1px solid rgba(15, 118, 110, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--surface);
 }
 
-.step-item.active {
+.step-row.active {
   background: linear-gradient(135deg, rgba(15, 118, 110, 0.15), rgba(249, 115, 22, 0.12));
   border-color: rgba(15, 118, 110, 0.3);
   box-shadow: var(--shadow);
@@ -322,4 +353,47 @@ form select:focus {
 .install-steps li {
   margin-bottom: 10px;
   line-height: 1.5;
+}
+
+.show-password {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+@media (max-width: 900px) {
+  .timer-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .shell {
+    padding: 16px;
+  }
+  .topbar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .nav-toggle {
+    display: inline-block;
+  }
+  .nav {
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .nav.open {
+    display: flex;
+  }
+  .nav a,
+  .nav form button {
+    width: 100%;
+    text-align: left;
+  }
 }

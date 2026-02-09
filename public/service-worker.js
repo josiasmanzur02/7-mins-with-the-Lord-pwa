@@ -1,4 +1,4 @@
-const CACHE_NAME = 'seven-minutes-cache-v2';
+const CACHE_NAME = 'seven-minutes-cache-v5';
 const OFFLINE_URLS = ['/', '/home', '/css/style.css', '/js/app.js', '/manifest.json', '/icons/logo.svg'];
 
 self.addEventListener('install', (event) => {

@@ -1,12 +1,12 @@
 <%- include('partials/header') %>
 
 <div class="card">
-  <h1 class="title">Install on your phone</h1>
-  <p class="muted">The app is a Progressive Web App (PWA). Add it to your home screen to use it like a native app.</p>
+  <h1 class="title"><%= t('install_title') %></h1>
+  <p class="muted"><%= t('install_desc') %></p>
 
   <div class="grid two install-steps">
     <div>
-      <h3>iOS (Safari)</h3>
+      <h3><%= t('install_ios') %></h3>
       <ol>
         <li>Open this site in Safari.</li>
         <li>Tap the Share icon.</li>
@@ -15,7 +15,7 @@
       </ol>
     </div>
     <div>
-      <h3>Android (Chrome)</h3>
+      <h3><%= t('install_android') %></h3>
       <ol>
         <li>Open this site in Chrome.</li>
         <li>Tap the ⋮ menu and choose “Install app” (or “Add to Home screen”).</li>

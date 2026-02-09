@@ -2,39 +2,51 @@
 
 <div class="auth-container card">
   <div class="tabs">
-    <a class="tab <%= tab === 'login' ? 'active' : '' %>" href="/auth?tab=login">Log in</a>
-    <a class="tab <%= tab === 'signup' ? 'active' : '' %>" href="/auth?tab=signup">Sign up</a>
+    <a class="tab <%= tab === 'login' ? 'active' : '' %>" href="/auth?tab=login"><%= t('auth_login') %></a>
+    <a class="tab <%= tab === 'signup' ? 'active' : '' %>" href="/auth?tab=signup"><%= t('auth_signup') %></a>
   </div>
 
   <% if (tab === 'signup') { %>
     <form class="stack" method="POST" action="/auth/signup">
       <div>
-        <label for="name">Name</label>
+        <label for="name"><%= t('auth_name') %></label>
         <input required id="name" name="name" placeholder="Your name" />
       </div>
       <div>
-        <label for="email">Email</label>
+        <label for="email"><%= t('auth_email') %></label>
         <input required id="email" name="email" type="email" placeholder="you@example.com" />
       </div>
-      <div>
-        <label for="password">Password</label>
-        <input required id="password" name="password" type="password" minlength="6" />
+      <div class="input-col">
+        <label for="signup_password"><%= t('auth_password') %></label>
+        <input required class="password-input" id="signup_password" name="password" type="password" minlength="6" />
       </div>
-      <button type="submit">Create account</button>
+      <div class="input-col">
+        <label for="signup_confirm_password"><%= t('auth_confirm_password') %></label>
+        <input required class="password-input" id="signup_confirm_password" name="confirm_password" type="password" minlength="6" />
+      </div>
+      <label class="toggle-row">
+        <input type="checkbox" class="pwd-toggle" data-targets="signup_password,signup_confirm_password" data-label-show="<%= t('auth_show_password') %>" data-label-hide="<%= t('auth_hide_password') %>" />
+        <span><%= t('auth_show_password') %></span>
+      </label>
+      <button type="submit"><%= t('auth_create') %></button>
     </form>
   <% } else { %>
     <form class="stack" method="POST" action="/auth/login">
       <div>
-        <label for="email">Email</label>
+        <label for="email"><%= t('auth_email') %></label>
         <input required id="email" name="email" type="email" placeholder="you@example.com" />
       </div>
-      <div>
-        <label for="password">Password</label>
-        <input required id="password" name="password" type="password" />
+      <div class="input-col">
+        <label for="login_password"><%= t('auth_password') %></label>
+        <input required class="password-input" id="login_password" name="password" type="password" />
       </div>
-      <button type="submit">Log in</button>
+      <label class="toggle-row">
+        <input type="checkbox" class="pwd-toggle" data-targets="login_password" data-label-show="<%= t('auth_show_password') %>" data-label-hide="<%= t('auth_hide_password') %>" />
+        <span><%= t('auth_show_password') %></span>
+      </label>
+      <button type="submit"><%= t('auth_log_in') %></button>
     </form>
   <% } %>
 </div>
 
-<%- include('partials/footer') %>
+<%- include('partials/footer', { pageScript: '/js/auth.js?v=3' }) %>
