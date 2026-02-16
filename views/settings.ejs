@@ -2,20 +2,31 @@
 
 <div class="card">
   <h1 class="title"><%= t('settings_title') %></h1>
-  <form class="settings-grid" method="POST" action="/settings">
+  <form class="settings-grid" id="prefs-form">
     <div>
       <label for="theme"><%= t('settings_theme') %></label>
       <select id="theme" name="theme">
-        <option value="light" <%= currentUser.theme === 'light' ? 'selected' : '' %>>Light</option>
-        <option value="dark" <%= currentUser.theme === 'dark' ? 'selected' : '' %>>Dark</option>
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
       </select>
     </div>
     <div>
       <label for="language"><%= t('settings_language') %></label>
       <select id="language" name="language">
-        <option value="en" <%= currentUser.language === 'en' ? 'selected' : '' %>>English</option>
-        <option value="es" <%= currentUser.language === 'es' ? 'selected' : '' %>>Español</option>
+        <option value="en">English</option>
+        <option value="es">Español</option>
       </select>
+    </div>
+    <div>
+      <label for="sound-enabled"><%= t('settings_sound') %></label>
+      <label class="toggle-row">
+        <input type="checkbox" id="sound-enabled" />
+        <span><%= t('settings_sound_enable') %></span>
+      </label>
+      <label class="muted small" style="display:block;margin-top:6px;">
+        <%= t('settings_volume') %>
+        <input type="range" id="sound-volume" min="0" max="1" step="0.05" />
+      </label>
     </div>
     <div style="align-self:end;">
       <button type="submit"><%= t('settings_save') %></button>
@@ -24,24 +35,50 @@
 </div>
 
 <div class="card" style="margin-top:16px;">
-  <h3><%= t('settings_password_title') %></h3>
-  <form class="settings-grid" method="POST" action="/settings/password">
+  <h3><%= t('settings_alarm') %></h3>
+  <p class="muted small">Best effort while the app is open. Notifications depend on browser permission. iOS PWAs cannot ring in the background.</p>
+  <div class="alarm-grid">
+    <label class="toggle-row">
+      <input type="checkbox" id="alarm-enabled" />
+      <span><%= t('settings_alarm_enable') %></span>
+    </label>
     <div>
-      <label for="current_password"><%= t('settings_old_password') %></label>
-      <input id="current_password" name="current_password" type="password" required />
+      <label for="alarm-time"><%= t('settings_alarm_time') %></label>
+      <input type="time" id="alarm-time" value="07:00" />
     </div>
     <div>
-      <label for="new_password"><%= t('settings_new_password') %></label>
-      <input id="new_password" name="new_password" type="password" required minlength="6" />
+      <label><%= t('settings_alarm_days') %></label>
+      <div class="day-pills" id="alarm-days">
+        <% ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach((d, idx) => { %>
+          <button type="button" data-day="<%= idx %>"><%= d %></button>
+        <% }) %>
+      </div>
     </div>
-    <div>
-      <label for="new_password_confirm"><%= t('settings_new_confirm') %></label>
-      <input id="new_password_confirm" name="new_password_confirm" type="password" required minlength="6" />
+    <div class="controls" style="margin-top:8px;">
+      <button id="alarm-save" type="button"><%= t('settings_save') %></button>
+      <button id="alarm-test" type="button" class="ghost"><%= t('settings_alarm_test') %></button>
     </div>
-    <div style="align-self:end;">
-      <button type="submit"><%= t('settings_change_password') %></button>
-    </div>
-  </form>
+    <p class="muted small" id="alarm-next"></p>
+  </div>
 </div>
 
-<%- include('partials/footer') %>
+<div class="card" style="margin-top:16px;">
+  <h3>Streak & preferences backup</h3>
+  <p class="muted">Everything is stored on this device. Export/import to move streak, settings, alarms.</p>
+  <div class="controls">
+    <button id="export-data" type="button"><%= t('settings_export') %></button>
+    <label class="ghost" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
+      <input type="file" id="import-data" accept="application/json" style="display:none;" />
+      <%= t('settings_import') %>
+    </label>
+    <button id="reset-data" type="button" class="ghost danger"><%= t('settings_reset') %></button>
+  </div>
+  <p class="muted" id="data-status"></p>
+</div>
+
+<div class="card" style="margin-top:16px;">
+  <h3>Feedback</h3>
+  <p class="muted">Found a bug or have a suggestion? Email <a href="mailto:manzur.josias@gmail.com">manzur.josias@gmail.com</a>.</p>
+</div>
+
+<%- include('partials/footer', { pageScript: '/js/settings.js' }) %>

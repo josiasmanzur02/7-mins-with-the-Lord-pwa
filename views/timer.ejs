@@ -1,33 +1,35 @@
 <%- include('partials/header') %>
 
 <div class="card timer-card">
-  <div>
+  <div class="timer-hero">
     <p class="muted"><%= t('timer_focus') %></p>
     <h1 class="title step-title"><%= steps[0].label %></h1>
     <div class="timer-display">07:00</div>
-    <div class="controls">
-      <button id="pause-btn">Pause</button>
+    <div class="verse-primary muted"></div>
+    <div class="controls timer-controls">
+      <button id="pause-btn" class="primary">Start</button>
       <button id="back-btn" class="ghost">Back</button>
-      <button id="exit-btn" class="ghost">Exit</button>
+      <button id="exit-btn" class="ghost danger-ghost">Exit</button>
     </div>
-    <div class="verse muted"></div>
     <p class="muted" id="status"></p>
   </div>
 
-  <div>
-    <div class="progress-box" style="margin-bottom: 10px;">
-      <div><%= t('progress') %></div>
-      <div class="progress-text">1 / <%= steps.length %></div>
+  <div class="timer-details">
+    <button id="toggle-steps" class="ghost expand-btn">Show steps ↓</button>
+    <div id="steps-panel" class="steps-panel">
+      <div class="progress-box" style="margin-bottom: 10px;">
+        <div><%= t('progress') %></div>
+        <div class="progress-text">1 / <%= steps.length %></div>
+      </div>
+      <ul class="step-list">
+        <% steps.forEach((s) => { %>
+          <li class="step-row">
+            <span><%= s.label %></span>
+            <span class="muted"><%= s.seconds %>s</span>
+          </li>
+        <% }) %>
+      </ul>
     </div>
-    <ul class="step-list">
-      <% steps.forEach((s) => { %>
-        <li class="step-row">
-          <span><%= s.label %></span>
-          <span class="muted"><%= s.seconds %>s</span>
-        </li>
-      <% }) %>
-    </ul>
-    <p class="muted" style="margin-top:12px;"><%= t('timer_tip') %></p>
   </div>
 </div>
 

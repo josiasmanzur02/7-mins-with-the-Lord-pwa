@@ -1,6 +1,6 @@
 (() => {
   const steps = window.STEPS || [];
-  const verseBox = document.querySelector('.verse');
+  const verseBox = document.querySelector('.verse-primary');
   const titleEl = document.querySelector('.step-title');
   const timerEl = document.querySelector('.timer-display');
   const listItems = Array.from(document.querySelectorAll('.step-row'));
@@ -9,6 +9,9 @@
   const exitBtn = document.getElementById('exit-btn');
   const progressText = document.querySelector('.progress-text');
   const statusEl = document.getElementById('status');
+  const toggleBtn = document.getElementById('toggle-steps');
+  const stepsPanel = document.getElementById('steps-panel');
+  const fromAlarm = window.location.hash === '#alarm';
 
   const verses = [
     { ref: 'Romans 10:13', text: 'For “whoever calls upon the name of the Lord shall be saved.”', link: 'https://text.recoveryversion.bible/RcV.htm?reference=Romans%2010:13' },
@@ -24,29 +27,13 @@
   let remaining = steps[0]?.seconds || 0;
   let ticker = null;
   let paused = true;
+  let finished = false;
+  const totalSeconds = steps.reduce((sum, s) => sum + (s.seconds || 0), 0);
 
   function fmt(sec) {
     const m = String(Math.floor(sec / 60)).padStart(2, '0');
     const s = String(sec % 60).padStart(2, '0');
     return `${m}:${s}`;
-  }
-
-  function beep() {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = 880;
-      gain.gain.setValueAtTime(0.06, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.4);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.4);
-    } catch (e) {
-      // ignore
-    }
   }
 
   function render() {
@@ -58,12 +45,51 @@
       el.classList.toggle('active', i === index);
     });
     const verse = verses[index] || verses[verses.length - 1];
-    verseBox.innerHTML = `<div>${verse.text}</div><a href="${verse.link}" target="_blank" rel="noreferrer">${verse.ref}</a>`;
-    progressText.textContent = `${index + 1} / ${steps.length}`;
+    if (verseBox) {
+      verseBox.innerHTML = `<div>${verse.text}</div><a href="${verse.link}" target="_blank" rel="noreferrer">${verse.ref}</a>`;
+    }
+    if (progressText) progressText.textContent = `${index + 1} / ${steps.length}`;
+    if (backBtn) backBtn.style.visibility = index === 0 ? 'hidden' : 'visible';
+  }
+
+  function tick() {
+    if (remaining <= 0) {
+      nextStep();
+      return;
+    }
+    remaining -= 1;
+    timerEl.textContent = fmt(remaining);
+  }
+
+  function start() {
+    window.AudioManager?.prime();
+    if (ticker) clearInterval(ticker);
+    ticker = setInterval(tick, 1000);
+    paused = false;
+    pauseBtn.textContent = 'Pause';
+  }
+
+  function pause() {
+    if (ticker) clearInterval(ticker);
+    paused = true;
+    pauseBtn.textContent = finished ? 'Restart' : 'Resume';
+  }
+
+  function togglePause() {
+    if (finished) {
+      // restart from scratch
+      index = 0;
+      remaining = steps[0]?.seconds || 0;
+      finished = false;
+      statusEl.textContent = '';
+      render();
+    }
+    if (paused) start();
+    else pause();
   }
 
   function nextStep() {
-    beep();
+    window.AudioManager?.play('ping');
     if (index + 1 >= steps.length) {
       finish();
       return;
@@ -80,55 +106,52 @@
     render();
   }
 
-  function tick() {
-    if (remaining <= 0) {
-      nextStep();
-      return;
-    }
-    remaining -= 1;
-    timerEl.textContent = fmt(remaining);
-  }
-
-  function start() {
-    if (ticker) clearInterval(ticker);
-    ticker = setInterval(tick, 1000);
-    paused = false;
-    pauseBtn.textContent = 'Pause';
-  }
-
-  function pause() {
-    if (ticker) clearInterval(ticker);
-    paused = true;
-    pauseBtn.textContent = 'Resume';
-  }
-
-  function togglePause() {
-    if (paused) start();
-    else pause();
+  function dateKey(value) {
+    return new Date(value).toISOString().slice(0, 10);
   }
 
   async function finish() {
     pause();
-    statusEl.textContent = 'Saving your session...';
-    try {
-      const res = await fetch('/devotion/complete', { method: 'POST' });
-      const data = await res.json();
-      if (data.ok) {
-        statusEl.textContent = `Session saved. Streak: ${data.streak} day${data.streak === 1 ? '' : 's'}.`;
+    finished = true;
+    statusEl.textContent = 'Well done. Saving your session...';
+    window.AudioManager?.play('finish');
+    const today = dateKey(Date.now());
+    const yesterday = dateKey(Date.now() - 86400000);
+    const updated = await window.AppStorage.updateState((s) => {
+      const last = s.streak.lastCheckDate;
+      if (last === today) {
+        // keep streak
+      } else if (last === yesterday) {
+        s.streak.count = (s.streak.count || 0) + 1;
       } else {
-        statusEl.textContent = 'Saved locally, but server did not confirm.';
+        s.streak.count = 1;
       }
-    } catch (e) {
-      statusEl.textContent = 'Offline? The session could not be recorded.';
-    }
+      s.streak.lastCheckDate = today;
+      const log = { date: today, durationSec: totalSeconds, steps: steps.length };
+      s.logs = [log, ...(s.logs || [])].slice(0, 50);
+      return s;
+    });
+    statusEl.textContent = `Streak: ${updated.streak.count} day${updated.streak.count === 1 ? '' : 's'}.`;
+    pauseBtn.textContent = 'Restart';
   }
 
-  pauseBtn.addEventListener('click', togglePause);
-  backBtn.addEventListener('click', prevStep);
-  exitBtn.addEventListener('click', () => {
-    window.location.href = '/home';
-  });
+  if (pauseBtn) pauseBtn.addEventListener('click', togglePause);
+  if (backBtn) backBtn.addEventListener('click', prevStep);
+  if (exitBtn)
+    exitBtn.addEventListener('click', () => {
+      window.location.href = '/home';
+    });
+
+  if (toggleBtn && stepsPanel) {
+    toggleBtn.addEventListener('click', () => {
+      const open = stepsPanel.classList.toggle('open');
+      toggleBtn.textContent = open ? 'Hide steps ↑' : 'Show steps ↓';
+    });
+  }
+
+  if (fromAlarm && statusEl) {
+    statusEl.textContent = 'Reminder triggered — start when ready.';
+  }
 
   render();
-  start();
 })();

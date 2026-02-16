@@ -1,5 +1,17 @@
-const CACHE_NAME = 'seven-minutes-cache-v5';
-const OFFLINE_URLS = ['/', '/home', '/css/style.css', '/js/app.js', '/manifest.json', '/icons/logo.svg'];
+const CACHE_NAME = 'seven-minutes-cache-v7';
+const OFFLINE_URLS = [
+  '/',
+  '/home',
+  '/css/style.css',
+  '/js/storage.js',
+  '/js/app.js',
+  '/js/alarm.js',
+  '/js/home.js',
+  '/js/settings.js',
+  '/js/timer.js',
+  '/manifest.json',
+  '/icons/logo.svg',
+];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -19,13 +31,23 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = '/timer#alarm';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientsArr) => {
+      const client = clientsArr.find((c) => c.visibilityState === 'visible');
+      if (client) {
+        client.navigate(url);
+        return client.focus();
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});
+
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-
-  const url = new URL(event.request.url);
-
-  // Let auth pages and API calls bypass the cache to avoid redirect loops.
-  if (url.pathname.startsWith('/auth') || url.pathname.startsWith('/devotion')) return;
 
   // For navigations, prefer network and fall back to cached shell.
   if (event.request.mode === 'navigate') {
@@ -41,12 +63,7 @@ self.addEventListener('fetch', (event) => {
       return fetch(event.request)
         .then((res) => {
           // Avoid caching redirects/opaque responses that trip Safari.
-          if (
-            res &&
-            res.ok &&
-            !res.redirected &&
-            res.type === 'basic'
-          ) {
+          if (res && res.ok && !res.redirected && res.type === 'basic') {
             const resClone = res.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, resClone));
           }

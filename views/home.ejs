@@ -2,20 +2,26 @@
 
 <div class="grid two">
   <div class="card">
-    <p class="muted"><%= t('brand') %></p>
-    <h1 class="title"><%= t('home_title') %></h1>
-    <div class="streak">
-      <%= streak %> <%= lang === 'es' ? 'días' : 'days' %>
-      <span class="pill"><%= t('home_subtitle') %></span>
+    <p class="muted"><%= t('brand') %></p> 
+    <!--h1 class="title"><%= t('home_title') %></h1-->
+    <div class="streak-card">
+      <div class="streak-head">
+        <div>
+          <p class="muted small"><%= t('home_subtitle') %></p>
+          <div class="streak-days">
+            <span id="streak-count">0</span>
+            <span class="unit" id="streak-label"><%= lang === 'es' ? 'días' : 'days' %></span>
+          </div>
+        </div>
+        <!--span class="streak-chip">🔥 Keep it going</span-->
+      </div>
+      <div class="streak-progress">
+        <div class="streak-progress-fill" id="streak-bar-fill"></div>
+      </div>
     </div>
-    <% if (lastCheck) { %>
-      <p class="muted">Last time: <%= lastCheck %> <%= checkedToday ? '(today)' : '' %></p>
-    <% } else { %>
-      <p class="muted">No sessions yet. Today is a great day to start.</p>
-    <% } %>
+    <p class="muted" id="last-check">No sessions yet. Today is a great day to start.</p>
     <div class="controls" style="margin-top: 12px;">
       <a class="cta" href="/timer"><%= t('home_cta_start') %></a>
-      <a class="ghost" href="/install"><%= t('home_cta_install') %></a>
     </div>
   </div>
 
@@ -33,4 +39,4 @@
   </div>
 </div>
 
-<%- include('partials/footer') %>
+<%- include('partials/footer', { pageScript: '/js/home.js' }) %>
