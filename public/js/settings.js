@@ -1,4 +1,5 @@
 (() => {
+  const t = window.t || ((key) => key);
   const themeSel = document.getElementById('theme');
   const langSel = document.getElementById('language');
   const soundEnabled = document.getElementById('sound-enabled');
@@ -62,6 +63,7 @@
   if (prefsForm) {
     prefsForm.addEventListener('submit', async (e) => {
       e.preventDefault();
+      const prevLang = document.documentElement.lang || 'en';
       await window.AppStorage.updateState((s) => {
         s.settings.theme = themeSel ? themeSel.value : 'light';
         s.settings.language = langSel ? langSel.value : 'en';
@@ -71,8 +73,13 @@
       });
       await window.AudioManager?.syncVolume();
       document.documentElement.dataset.theme = themeSel ? themeSel.value : 'light';
-      document.documentElement.lang = langSel ? langSel.value : 'en';
-      status('Preferences saved to device.');
+      const nextLang = langSel ? langSel.value : 'en';
+      document.documentElement.lang = nextLang;
+      document.cookie = `lang=${nextLang}; path=/; max-age=31536000; SameSite=Lax`;
+      status(t('settings_saved'));
+      if (prevLang !== nextLang) {
+        window.location.reload();
+      }
     });
   }
 
@@ -89,7 +96,7 @@
         await window.AlarmScheduler.requestPermission();
       }
       updateNextAlarmText();
-      status('Reminder settings saved.');
+      status(t('settings_alarm_saved'));
     });
   }
 
@@ -103,9 +110,9 @@
     if (!alarmNext) return;
     const next = await window.AlarmScheduler.nextAlarmDate();
     if (!next) {
-      alarmNext.textContent = 'No upcoming reminder scheduled.';
+      alarmNext.textContent = t('settings_alarm_none');
     } else {
-      alarmNext.textContent = `Next reminder: ${next.toLocaleString()}`;
+      alarmNext.textContent = t('settings_alarm_next', { datetime: next.toLocaleString() });
     }
   }
 
@@ -121,7 +128,7 @@
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      status('Exported data.');
+      status(t('settings_exported'));
     });
   }
 
@@ -136,9 +143,9 @@
           await window.AppStorage.importState(parsed);
           await loadPrefs();
           await window.AlarmScheduler.schedule();
-          status('Imported data.');
+          status(t('settings_imported'));
         } catch (err) {
-          status('Invalid file.');
+          status(t('settings_invalid_file'));
         }
       };
       reader.readAsText(file);
@@ -147,11 +154,11 @@
 
   if (resetBtn) {
     resetBtn.addEventListener('click', async () => {
-      if (!confirm('Reset all local data? This cannot be undone.')) return;
+      if (!confirm(t('settings_reset_confirm'))) return;
       await window.AppStorage.resetState();
       await loadPrefs();
       await window.AlarmScheduler.schedule();
-      status('Local data reset.');
+      status(t('settings_reset_done'));
     });
   }
 

@@ -9,6 +9,11 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=DM+Sans:wght@400;500&display=swap" />
     <link rel="stylesheet" href="/css/style.css" />
     <title>7 Minutes with the Lord</title>
+    <script>
+      window.I18N_ALL = <%- JSON.stringify(translations) %>;
+      window.I18N_LANG = '<%= lang %>';
+      window.I18N = window.I18N_ALL[window.I18N_LANG] || window.I18N_ALL.en;
+    </script>
   </head>
   <body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">
     <div class="shell">
@@ -17,7 +22,7 @@
           <span class="logo-dot"></span>
           <span class="brand-name"><%= t('brand') %></span>
         </div>
-        <button class="nav-toggle" aria-label="Toggle menu">☰</button>
+        <button class="nav-toggle" aria-label="<%= t('nav_toggle') %>">☰</button>
         <nav class="nav">
           <a href="/home"><%= t('nav_home') %></a>
           <a href="/timer"><%= t('nav_start') %></a>

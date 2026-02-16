@@ -1,25 +1,41 @@
 <%- include('partials/header') %>
 
 <div class="grid two">
-  <div class="card">
-    <p class="muted"><%= t('brand') %></p> 
-    <!--h1 class="title"><%= t('home_title') %></h1-->
-    <div class="streak-card">
-      <div class="streak-head">
-        <div>
-          <p class="muted small"><%= t('home_subtitle') %></p>
-          <div class="streak-days">
-            <span id="streak-count">0</span>
-            <span class="unit" id="streak-label"><%= lang === 'es' ? 'días' : 'days' %></span>
+  <div class="card streak-card">
+    <div class="streak-meta">
+      <div class="streak-ring">
+        <div class="streak-ring-inner">
+          <span id="streak-count">0</span>
+          <span class="streak-unit" id="streak-label"><%= t('home_days') %></span>
+        </div>
+      </div>
+      <div class="streak-copy">
+        <p class="muted small"><%= t('home_subtitle') %></p>
+        <h3 class="streak-title"><%= t('home_keep_up') %></h3>
+        <p class="muted small" id="last-check"><%= t('home_no_sessions') %></p>
+        <div class="streak-progress-row">
+          <span class="muted small"><%= t('home_week_goal') %></span>
+          <div class="streak-progress">
+            <div class="streak-progress-fill" id="streak-bar-fill"></div>
           </div>
         </div>
-        <!--span class="streak-chip">🔥 Keep it going</span-->
-      </div>
-      <div class="streak-progress">
-        <div class="streak-progress-fill" id="streak-bar-fill"></div>
       </div>
     </div>
-    <p class="muted" id="last-check">No sessions yet. Today is a great day to start.</p>
+
+    <div class="streak-calendar">
+      <div class="calendar-header">
+        <button type="button" class="ghost icon-btn" id="month-prev" aria-label="Previous month">‹</button>
+        <div class="calendar-month" id="month-label"></div>
+        <button type="button" class="ghost icon-btn" id="month-next" aria-label="Next month">›</button>
+      </div>
+      <div class="calendar-weekdays" id="calendar-weekdays"></div>
+      <div class="calendar-grid" id="calendar-grid"></div>
+      <div class="calendar-legend">
+        <span class="legend-dot done"></span><span class="legend-label"><%= t('home_calendar_complete') %></span>
+        <span class="legend-dot missed"></span><span class="legend-label"><%= t('home_calendar_missed') %></span>
+      </div>
+    </div>
+
     <div class="controls" style="margin-top: 12px;">
       <a class="cta" href="/timer"><%= t('home_cta_start') %></a>
     </div>

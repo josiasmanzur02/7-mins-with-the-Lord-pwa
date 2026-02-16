@@ -1,4 +1,5 @@
 (() => {
+  const t = window.t || ((key) => key);
   const MAX_TIMEOUT = 24 * 60 * 60 * 1000; // 24h chunks to avoid overflow
   let timeoutId = null;
   let snoozeId = null;
@@ -14,15 +15,15 @@
         <div class="alarm-header">
           <div class="alarm-dot"></div>
           <div>
-            <p class="muted small">Reminder</p>
-            <h2>Time with the Lord</h2>
+            <p class="muted small">${t('alarm_title')}</p>
+            <h2>${t('alarm_heading')}</h2>
           </div>
         </div>
-        <p class="muted">Your scheduled time is now. Start 7 minutes or snooze 10 minutes.</p>
+        <p class="muted">${t('alarm_body')}</p>
         <div class="controls">
-          <button id="alarm-start">Start 7 minutes</button>
-          <button id="alarm-snooze" class="ghost">Snooze 10 min</button>
-          <button id="alarm-stop" class="ghost">Stop</button>
+          <button id="alarm-start">${t('alarm_start')}</button>
+          <button id="alarm-snooze" class="ghost">${t('alarm_snooze')}</button>
+          <button id="alarm-stop" class="ghost">${t('alarm_stop')}</button>
         </div>
       </div>`;
     document.body.appendChild(modal);
@@ -95,15 +96,15 @@
     if (navigator.serviceWorker?.getRegistration) {
       navigator.serviceWorker.getRegistration().then((reg) => {
         if (!reg || !reg.showNotification) return;
-        reg.showNotification('7 Minutes — time to start', {
-          body: 'Your 7-minute time is ready. Tap to open.',
+        reg.showNotification(t('alarm_notification_title'), {
+          body: t('alarm_notification_body'),
           tag: 'seven-minutes-alarm',
         });
       });
       return;
     }
-    new Notification('7 Minutes — time to start', {
-      body: 'Your 7-minute time is ready. Tap to open.',
+    new Notification(t('alarm_notification_title'), {
+      body: t('alarm_notification_body'),
       tag: 'seven-minutes-alarm',
     });
   }

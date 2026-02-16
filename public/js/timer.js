@@ -1,4 +1,12 @@
 (() => {
+  const t = (key, vars) => (typeof window.t === 'function' ? window.t(key, vars) : key);
+  const tPlural =
+    window.tPlural ||
+    ((count, s, p) =>
+      count === 1
+        ? (typeof window.t === 'function' ? window.t(s) : s)
+        : (typeof window.t === 'function' ? window.t(p) : p));
+
   const steps = window.STEPS || [];
   const verseBox = document.querySelector('.verse-primary');
   const titleEl = document.querySelector('.step-title');
@@ -12,6 +20,11 @@
   const toggleBtn = document.getElementById('toggle-steps');
   const stepsPanel = document.getElementById('steps-panel');
   const fromAlarm = window.location.hash === '#alarm';
+
+  if (pauseBtn) pauseBtn.textContent = t('timer_start') || 'Start';
+  if (backBtn) backBtn.textContent = t('timer_back') || 'Back';
+  if (exitBtn) exitBtn.textContent = t('timer_exit') || 'Exit';
+  if (toggleBtn) toggleBtn.textContent = t('timer_show_steps') || 'Show steps ↓';
 
   const verses = [
     { ref: 'Romans 10:13', text: 'For “whoever calls upon the name of the Lord shall be saved.”', link: 'https://text.recoveryversion.bible/RcV.htm?reference=Romans%2010:13' },
@@ -66,13 +79,13 @@
     if (ticker) clearInterval(ticker);
     ticker = setInterval(tick, 1000);
     paused = false;
-    pauseBtn.textContent = 'Pause';
+    pauseBtn.textContent = t('timer_pause');
   }
 
   function pause() {
     if (ticker) clearInterval(ticker);
     paused = true;
-    pauseBtn.textContent = finished ? 'Restart' : 'Resume';
+    pauseBtn.textContent = finished ? t('timer_restart') : t('timer_resume');
   }
 
   function togglePause() {
@@ -113,7 +126,7 @@
   async function finish() {
     pause();
     finished = true;
-    statusEl.textContent = 'Well done. Saving your session...';
+    statusEl.textContent = t('timer_saving');
     window.AudioManager?.play('finish');
     const today = dateKey(Date.now());
     const yesterday = dateKey(Date.now() - 86400000);
@@ -131,8 +144,9 @@
       s.logs = [log, ...(s.logs || [])].slice(0, 50);
       return s;
     });
-    statusEl.textContent = `Streak: ${updated.streak.count} day${updated.streak.count === 1 ? '' : 's'}.`;
-    pauseBtn.textContent = 'Restart';
+    const label = tPlural(updated.streak.count, 'home_day', 'home_days');
+    statusEl.textContent = t('timer_saved', { count: updated.streak.count, label });
+    pauseBtn.textContent = t('timer_restart');
   }
 
   if (pauseBtn) pauseBtn.addEventListener('click', togglePause);
@@ -145,12 +159,12 @@
   if (toggleBtn && stepsPanel) {
     toggleBtn.addEventListener('click', () => {
       const open = stepsPanel.classList.toggle('open');
-      toggleBtn.textContent = open ? 'Hide steps ↑' : 'Show steps ↓';
+      toggleBtn.textContent = open ? t('timer_hide_steps') : t('timer_show_steps');
     });
   }
 
   if (fromAlarm && statusEl) {
-    statusEl.textContent = 'Reminder triggered — start when ready.';
+    statusEl.textContent = t('timer_reminder_triggered');
   }
 
   render();

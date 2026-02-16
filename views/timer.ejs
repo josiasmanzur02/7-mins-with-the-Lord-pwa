@@ -7,15 +7,15 @@
     <div class="timer-display">07:00</div>
     <div class="verse-primary muted"></div>
     <div class="controls timer-controls">
-      <button id="pause-btn" class="primary">Start</button>
-      <button id="back-btn" class="ghost">Back</button>
-      <button id="exit-btn" class="ghost danger-ghost">Exit</button>
+      <button id="pause-btn" class="primary"><%= t('timer_start') %></button>
+      <button id="back-btn" class="ghost"><%= t('timer_back') %></button>
+      <button id="exit-btn" class="ghost danger-ghost"><%= t('timer_exit') %></button>
     </div>
     <p class="muted" id="status"></p>
   </div>
 
   <div class="timer-details">
-    <button id="toggle-steps" class="ghost expand-btn">Show steps ↓</button>
+    <button id="toggle-steps" class="ghost expand-btn"><%= t('timer_show_steps') %></button>
     <div id="steps-panel" class="steps-panel">
       <div class="progress-box" style="margin-bottom: 10px;">
         <div><%= t('progress') %></div>
