@@ -266,6 +266,8 @@ form select:focus {
   color: var(--text);
   box-shadow: var(--shadow);
   border: 1px solid rgba(15, 118, 110, 0.14);
+  display: grid;
+  gap: 16px;
 }
 
 .streak-card .muted {
@@ -512,6 +514,46 @@ form select:focus {
 
   .streak-card {
     padding: 18px;
+  }
+}
+
+@media (min-width: 641px) {
+  .streak-ring {
+    width: 132px;
+    height: 132px;
+  }
+  .streak-ring-inner {
+    width: 90px;
+    height: 90px;
+  }
+  .calendar-weekdays,
+  .calendar-grid {
+    gap: 8px;
+  }
+}
+
+@media (min-width: 900px) {
+  .streak-card {
+    grid-template-columns: minmax(320px, 420px) 1fr;
+    align-items: stretch;
+  }
+  .streak-calendar {
+    margin-top: 0;
+    height: 100%;
+  }
+  .streak-meta {
+    align-items: center;
+  }
+  .streak-ring {
+    width: 142px;
+    height: 142px;
+  }
+  .streak-ring-inner {
+    width: 98px;
+    height: 98px;
+  }
+  .calendar-grid {
+    min-height: 260px;
   }
 }
 
