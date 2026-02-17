@@ -19,25 +19,24 @@
             <div class="streak-progress-fill" id="streak-bar-fill"></div>
           </div>
         </div>
+        <div class="controls start" style="margin-top: 16px;">
+          <a class="cta" href="/timer"><%= t('home_cta_start') %></a>
+        </div>
       </div>
     </div>
+  </div>
 
-    <div class="streak-calendar">
-      <div class="calendar-header">
-        <button type="button" class="ghost icon-btn" id="month-prev" aria-label="Previous month">‹</button>
-        <div class="calendar-month" id="month-label"></div>
-        <button type="button" class="ghost icon-btn" id="month-next" aria-label="Next month">›</button>
-      </div>
-      <div class="calendar-weekdays" id="calendar-weekdays"></div>
-      <div class="calendar-grid" id="calendar-grid"></div>
-      <div class="calendar-legend">
-        <span class="legend-dot done"></span><span class="legend-label"><%= t('home_calendar_complete') %></span>
-        <span class="legend-dot missed"></span><span class="legend-label"><%= t('home_calendar_missed') %></span>
-      </div>
+  <div class="card streak-calendar">
+    <div class="calendar-header">
+      <button type="button" class="ghost icon-btn" id="month-prev" aria-label="Previous month">‹</button>
+      <div class="calendar-month" id="month-label"></div>
+      <button type="button" class="ghost icon-btn" id="month-next" aria-label="Next month">›</button>
     </div>
-
-    <div class="controls" style="margin-top: 12px;">
-      <a class="cta" href="/timer"><%= t('home_cta_start') %></a>
+    <div class="calendar-weekdays" id="calendar-weekdays"></div>
+    <div class="calendar-grid" id="calendar-grid"></div>
+    <div class="calendar-legend">
+      <span class="legend-dot done"></span><span class="legend-label"><%= t('home_calendar_complete') %></span>
+      <span class="legend-dot missed"></span><span class="legend-label"><%= t('home_calendar_missed') %></span>
     </div>
   </div>
 </div>

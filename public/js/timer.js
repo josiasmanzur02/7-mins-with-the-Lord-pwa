@@ -62,6 +62,7 @@
       verseBox.innerHTML = `<div>${verse.text}</div><a href="${verse.link}" target="_blank" rel="noreferrer">${verse.ref}</a>`;
     }
     if (progressText) progressText.textContent = `${index + 1} / ${steps.length}`;
+    // Remove back button from layout on first step
     if (backBtn) backBtn.classList.toggle('hidden', index === 0);
   }
 

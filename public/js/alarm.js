@@ -3,6 +3,7 @@
   const MAX_TIMEOUT = 24 * 60 * 60 * 1000; // 24h chunks to avoid overflow
   let timeoutId = null;
 
+  // Pure notification scheduler (no modal UI)
   function msUntil(date) {
     return date.getTime() - Date.now();
   }

@@ -78,7 +78,7 @@ const translations = {
     timer_start: 'Start',
     timer_pause: 'Pause',
     timer_resume: 'Resume',
-    timer_restart: 'Restart',
+    timer_restart: 'Restart', 
     timer_back: 'Back',
     timer_exit: 'Exit',
     timer_show_steps: 'Show steps ↓',

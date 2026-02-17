@@ -25,6 +25,7 @@
   let monthCursor = startOfMonth(new Date());
   let completed = new Set();
 
+  // Utility: "2026-02-17" -> Date at local midnight
   function parseKey(key) {
     const [y, m, d] = key.split('-').map((n) => Number(n));
     return new Date(y, m - 1, d);
@@ -35,6 +36,7 @@
     return Math.round((a.getTime() - b.getTime()) / MS);
   }
 
+  // Recompute streak client-side so UI reflects missed days even if a session wasn't opened
   function computeStreak(logs = []) {
     if (!logs.length) return { count: 0, last: null };
     const sorted = [...logs].sort((a, b) => (a.date > b.date ? -1 : a.date < b.date ? 1 : 0));

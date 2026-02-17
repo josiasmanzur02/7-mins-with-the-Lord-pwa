@@ -55,7 +55,7 @@
         <% }) %>
       </div>
     </div>
-    <div class="controls" style="margin-top:8px;">
+    <div class="controls tight" style="margin-top:8px;">
       <button id="alarm-save" type="button"><%= t('settings_save') %></button>
       <button id="alarm-test" type="button" class="ghost"><%= t('settings_alarm_test') %></button>
     </div>
@@ -66,7 +66,7 @@
 <div class="card" style="margin-top:16px;">
   <h3><%= t('settings_backup_title') %></h3>
   <p class="muted"><%= t('settings_backup_desc') %></p>
-  <div class="controls">
+  <div class="controls tight">
     <button id="export-data" type="button"><%= t('settings_export') %></button>
     <input type="file" id="import-data" accept="application/json" class="file-input-hidden" />
     <button id="import-data-btn" type="button" class="btn-secondary"><%= t('settings_import') %></button>
