@@ -62,7 +62,7 @@
       verseBox.innerHTML = `<div>${verse.text}</div><a href="${verse.link}" target="_blank" rel="noreferrer">${verse.ref}</a>`;
     }
     if (progressText) progressText.textContent = `${index + 1} / ${steps.length}`;
-    if (backBtn) backBtn.style.visibility = index === 0 ? 'hidden' : 'visible';
+    if (backBtn) backBtn.classList.toggle('hidden', index === 0);
   }
 
   function tick() {

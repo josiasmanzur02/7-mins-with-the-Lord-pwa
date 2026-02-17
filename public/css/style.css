@@ -671,6 +671,10 @@ form select:focus {
   font-size: 16px;
 }
 
+.timer-controls .hidden {
+  display: none !important;
+}
+
 .danger-ghost {
   color: #b91c1c;
 }
