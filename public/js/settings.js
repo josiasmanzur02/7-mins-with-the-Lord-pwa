@@ -8,6 +8,7 @@
   const dataStatus = document.getElementById('data-status');
   const exportBtn = document.getElementById('export-data');
   const importInput = document.getElementById('import-data');
+  const importBtn = document.getElementById('import-data-btn');
   const resetBtn = document.getElementById('reset-data');
 
   const alarmEnabled = document.getElementById('alarm-enabled');
@@ -129,6 +130,13 @@
       a.remove();
       URL.revokeObjectURL(url);
       status(t('settings_exported'));
+    });
+  }
+
+  if (importBtn && importInput) {
+    importBtn.addEventListener('click', () => {
+      importInput.value = '';
+      importInput.click();
     });
   }
 

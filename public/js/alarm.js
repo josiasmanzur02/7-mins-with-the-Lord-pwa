@@ -2,53 +2,6 @@
   const t = window.t || ((key) => key);
   const MAX_TIMEOUT = 24 * 60 * 60 * 1000; // 24h chunks to avoid overflow
   let timeoutId = null;
-  let snoozeId = null;
-
-  function createModal() {
-    let modal = document.getElementById('alarm-modal');
-    if (modal) return modal;
-    modal = document.createElement('div');
-    modal.id = 'alarm-modal';
-    modal.className = 'alarm-panel';
-    modal.innerHTML = `
-      <div class="alarm-card">
-        <div class="alarm-header">
-          <div class="alarm-dot"></div>
-          <div>
-            <p class="muted small">${t('alarm_title')}</p>
-            <h2>${t('alarm_heading')}</h2>
-          </div>
-        </div>
-        <p class="muted">${t('alarm_body')}</p>
-        <div class="controls">
-          <button id="alarm-start">${t('alarm_start')}</button>
-          <button id="alarm-snooze" class="ghost">${t('alarm_snooze')}</button>
-          <button id="alarm-stop" class="ghost">${t('alarm_stop')}</button>
-        </div>
-      </div>`;
-    document.body.appendChild(modal);
-
-    modal.querySelector('#alarm-start')?.addEventListener('click', () => {
-      hideModal();
-      window.location.href = '/timer#alarm';
-    });
-    modal.querySelector('#alarm-snooze')?.addEventListener('click', () => {
-      hideModal();
-      scheduleSnooze(10 * 60 * 1000);
-    });
-    modal.querySelector('#alarm-stop')?.addEventListener('click', hideModal);
-    return modal;
-  }
-
-  function showModal() {
-    const modal = createModal();
-    modal.classList.add('open');
-  }
-
-  function hideModal() {
-    const modal = document.getElementById('alarm-modal');
-    if (modal) modal.classList.remove('open');
-  }
 
   function msUntil(date) {
     return date.getTime() - Date.now();
@@ -73,11 +26,6 @@
       return candidate;
     }
     return null;
-  }
-
-  function scheduleSnooze(delayMs) {
-    if (snoozeId) clearTimeout(snoozeId);
-    snoozeId = setTimeout(() => trigger('snooze'), delayMs);
   }
 
   async function schedule() {
@@ -110,14 +58,12 @@
   }
 
   async function trigger(reason) {
-    window.AudioManager?.play('alarm');
-    showModal();
     maybeNotify();
     await window.AppStorage.updateState((s) => {
       s.settings.alarm.lastTriggeredAt = new Date().toISOString();
       return s;
     });
-    // reschedule next alarm (ignores snooze override)
+    // reschedule next alarm
     schedule();
   }
 

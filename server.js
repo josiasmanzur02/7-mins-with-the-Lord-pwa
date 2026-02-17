@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 const translations = {
   en: {
     brand: '7 Minutes',
-    nav_home: 'Home',
+    nav_home: 'Home', 
     nav_start: 'Start',
     nav_settings: 'Settings',
     nav_install: 'Install',
@@ -87,7 +87,7 @@ const translations = {
     timer_saved: 'Streak: {{count}} {{label}}.',
     timer_reminder_triggered: 'Reminder triggered — start when ready.',
 
-    progress: 'Progress',
+    progress: 'Progress', 
     step_calling: 'Calling on the Lord',
     step_pray: 'Pray',
     step_pray_read: 'Pray-Read',
