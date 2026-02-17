@@ -25,6 +25,40 @@
   let monthCursor = startOfMonth(new Date());
   let completed = new Set();
 
+  function parseKey(key) {
+    const [y, m, d] = key.split('-').map((n) => Number(n));
+    return new Date(y, m - 1, d);
+  }
+
+  function daysBetween(a, b) {
+    const MS = 86400000;
+    return Math.round((a.getTime() - b.getTime()) / MS);
+  }
+
+  function computeStreak(logs = []) {
+    if (!logs.length) return { count: 0, last: null };
+    const sorted = [...logs].sort((a, b) => (a.date > b.date ? -1 : a.date < b.date ? 1 : 0));
+    const latestKey = sorted[0].date;
+    const latest = parseKey(latestKey);
+    const today = startOfDay(new Date());
+    const gap = daysBetween(today, latest);
+    if (gap > 1) return { count: 0, last: latestKey };
+
+    let count = 1;
+    let cursor = latest;
+    for (let i = 1; i < sorted.length; i += 1) {
+      const cur = parseKey(sorted[i].date);
+      const diff = daysBetween(cursor, cur);
+      if (diff === 1) {
+        count += 1;
+        cursor = cur;
+      } else {
+        break;
+      }
+    }
+    return { count, last: latestKey };
+  }
+
   const monthFormatter = new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' });
 
   function startOfDay(d) {
@@ -63,7 +97,7 @@
       const key = dayKey(date);
       const isDone = completed.has(key);
       let status = 'future';
-      if (date.getTime() === today.getTime()) status = isDone ? 'done today' : 'today';
+      if (date.getTime() === today.getTime()) status = isDone ? 'done' : 'today';
       else if (date < today) status = isDone ? 'done' : 'missed';
 
       const cell = document.createElement('div');
@@ -74,8 +108,9 @@
   }
 
   function updateStreakUI(state) {
-    const streak = state.streak?.count || 0;
-    const last = state.streak?.lastCheckDate;
+    const { count: calcCount, last: calcLast } = computeStreak(state.logs || []);
+    const streak = calcCount ?? state.streak?.count ?? 0;
+    const last = calcLast ?? state.streak?.lastCheckDate;
     if (streakEl) streakEl.textContent = streak;
     if (streakLabel) streakLabel.textContent = window.tPlural ? window.tPlural(streak, 'home_day', 'home_days') : t(streak === 1 ? 'home_day' : 'home_days');
 

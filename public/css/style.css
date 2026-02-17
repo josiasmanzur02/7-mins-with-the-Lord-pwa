@@ -450,12 +450,31 @@ form select:focus {
   background: rgba(15, 118, 110, 0.12);
   border: 1px solid rgba(15, 118, 110, 0.3);
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.5);
+  position: relative;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 800;
 }
 
-.cal-cell.done .cal-dot {
+.cal-cell.done .cal-dot,
+.cal-cell.done-today .cal-dot {
   background: linear-gradient(135deg, var(--primary), var(--accent));
   border-color: rgba(15, 118, 110, 0.65);
   box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.18);
+}
+
+.cal-cell.done .cal-dot::after,
+.cal-cell.done-today .cal-dot::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.35);
 }
 
 .cal-cell.today {
