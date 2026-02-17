@@ -683,8 +683,15 @@ form select:focus {
   border: 1px solid rgba(15, 118, 110, 0.1);
   display: flex;
   justify-content: space-between;
+  column-gap: 12px;
   align-items: center;
   background: var(--surface);
+}
+
+.step-row span:last-child {
+  margin-left: auto;
+  color: var(--muted);
+  font-weight: 700;
 }
 
 .step-row.active {
@@ -731,12 +738,7 @@ form select:focus {
 }
 
 .file-input-hidden {
-  position: absolute;
-  left: -9999px;
-  width: 0;
-  height: 0;
-  opacity: 0;
-  pointer-events: none;
+  display: none !important;
 }
 
 .btn-secondary {
@@ -847,16 +849,16 @@ form select:focus {
 }
 
 .timer-details {
-  margin-top: 16px;
+  margin-top: 18px;
   display: grid;
-  gap: 12px;
-  max-width: 840px;
+  gap: 14px;
+  max-width: 920px;
   margin-left: auto;
   margin-right: auto;
 }
 
 .expand-btn {
-  width: clamp(220px, 50%, 420px);
+  /* width: clamp(240px, 50%, 420px); */
   justify-content: center;
   margin: 0 auto;
   border-radius: 999px;
@@ -864,13 +866,13 @@ form select:focus {
 
 .steps-panel {
   display: none;
-  margin-top: 10px;
+  margin-top: 6px;
   background: var(--surface);
   border: 1px solid rgba(15, 118, 110, 0.14);
-  border-radius: 16px;
-  padding: 14px;
+  border-radius: 18px;
+  padding: 16px 18px;
   box-shadow: var(--shadow);
-  max-width: 840px;
+  width: min(92vw, 540px);
   margin-left: auto;
   margin-right: auto;
 }
