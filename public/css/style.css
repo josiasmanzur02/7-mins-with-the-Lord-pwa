@@ -652,6 +652,14 @@ form select:focus {
   justify-content: center;
 }
 
+.file-input-hidden {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
 .btn-secondary {
   background: rgba(15, 118, 110, 0.12);
   color: var(--primary-strong);
