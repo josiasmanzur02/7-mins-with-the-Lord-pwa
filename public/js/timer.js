@@ -36,12 +36,18 @@
     { ref: 'Matthew 7:7', text: 'Ask and it shall be given to you; seek and you shall find; knock and it shall be opened to you.', link: 'https://text.recoveryversion.bible/RcV.htm?reference=Matthew%207:7' },
   ];
 
+  const TRANSITION_SECONDS = 10;
   let index = 0;
+  let nextIndex = 1;
+  let mode = 'step'; // 'step' | 'transition'
   let remaining = steps[0]?.seconds || 0;
+  let transitionRemaining = 0;
   let ticker = null;
   let paused = true;
   let finished = false;
-  const totalSeconds = steps.reduce((sum, s) => sum + (s.seconds || 0), 0);
+  let statusLocked = fromAlarm;
+  const totalSeconds =
+    steps.reduce((sum, s) => sum + (s.seconds || 0), 0) + TRANSITION_SECONDS * Math.max(steps.length - 1, 0);
 
   function fmt(sec) {
     const m = String(Math.floor(sec / 60)).padStart(2, '0');
@@ -52,23 +58,55 @@
   function render() {
     const step = steps[index];
     if (!step) return;
-    titleEl.textContent = step.label;
-    timerEl.textContent = fmt(remaining);
+    const activeIndex = mode === 'transition' ? nextIndex : index;
+    const activeStep = steps[activeIndex] || step;
+    titleEl.textContent = activeStep.label;
+    const displaySeconds = mode === 'transition' ? transitionRemaining : remaining;
+    timerEl.textContent = fmt(displaySeconds);
     listItems.forEach((el, i) => {
-      el.classList.toggle('active', i === index);
+      el.classList.toggle('active', i === activeIndex);
     });
-    const verse = verses[index] || verses[verses.length - 1];
+    const verse = verses[activeIndex] || verses[verses.length - 1];
     if (verseBox) {
       verseBox.innerHTML = `<div>${verse.text}</div><a href="${verse.link}" target="_blank" rel="noreferrer">${verse.ref}</a>`;
     }
-    if (progressText) progressText.textContent = `${index + 1} / ${steps.length}`;
+    if (progressText) progressText.textContent = `${activeIndex + 1} / ${steps.length}`;
     // Remove back button from layout on first step
-    if (backBtn) backBtn.classList.toggle('hidden', index === 0);
+    if (backBtn) backBtn.classList.toggle('hidden', activeIndex === 0);
+
+    if (statusEl && !finished) {
+      if (mode === 'transition') {
+        statusLocked = false;
+        const nextLabel = steps[nextIndex]?.label || '';
+        statusEl.textContent = t('timer_next_up', {
+          label: nextLabel,
+          seconds: transitionRemaining,
+        });
+      } else if (!statusLocked) {
+        statusEl.textContent = '';
+      }
+    }
   }
 
   function tick() {
+    if (mode === 'transition') {
+      if (transitionRemaining <= 0) {
+        beginNextStep();
+        return;
+      }
+      transitionRemaining -= 1;
+      timerEl.textContent = fmt(transitionRemaining);
+      if (statusEl && !finished) {
+        statusEl.textContent = t('timer_next_up', {
+          label: steps[nextIndex]?.label || '',
+          seconds: transitionRemaining,
+        });
+      }
+      return;
+    }
+
     if (remaining <= 0) {
-      nextStep();
+      handleStepComplete();
       return;
     }
     remaining -= 1;
@@ -94,7 +132,11 @@
       // restart from scratch
       index = 0;
       remaining = steps[0]?.seconds || 0;
+      transitionRemaining = 0;
+      mode = 'step';
+      nextIndex = 1;
       finished = false;
+      statusLocked = false;
       statusEl.textContent = '';
       render();
     }
@@ -102,20 +144,40 @@
     else pause();
   }
 
-  function nextStep() {
+  function enterTransition() {
+    mode = 'transition';
+    transitionRemaining = TRANSITION_SECONDS;
+    nextIndex = Math.min(index + 1, steps.length - 1);
+    render();
+  }
+
+  function handleStepComplete() {
     window.AudioManager?.play('ping');
     if (index + 1 >= steps.length) {
       finish();
       return;
     }
-    index += 1;
-    remaining = steps[index].seconds;
+    enterTransition();
+  }
+
+  function beginNextStep() {
+    mode = 'step';
+    index = nextIndex;
+    remaining = steps[index]?.seconds || 0;
+    transitionRemaining = 0;
+    window.AudioManager?.play('ping');
     render();
   }
 
   function prevStep() {
-    if (index === 0) return;
-    index -= 1;
+    if (mode === 'transition') {
+      index = Math.max(0, nextIndex - 1);
+      mode = 'step';
+      transitionRemaining = 0;
+    } else {
+      if (index === 0) return;
+      index -= 1;
+    }
     remaining = steps[index].seconds;
     render();
   }

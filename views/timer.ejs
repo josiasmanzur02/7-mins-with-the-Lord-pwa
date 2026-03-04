@@ -1,10 +1,14 @@
 <%- include('partials/header') %>
 
+<% const initialSeconds = (steps && steps[0] && steps[0].seconds) ? steps[0].seconds : 0; %>
+<% const initialMinutes = String(Math.floor(initialSeconds / 60)).padStart(2, '0'); %>
+<% const initialRemainder = String(initialSeconds % 60).padStart(2, '0'); %>
+
 <div class="card timer-card">
   <div class="timer-hero">
     <p class="muted"><%= t('timer_focus') %></p>
     <h1 class="title step-title"><%= steps[0].label %></h1>
-    <div class="timer-display">07:00</div>
+    <div class="timer-display"><%= `${initialMinutes}:${initialRemainder}` %></div>
     <div class="verse-primary muted"></div>
     <div class="controls timer-controls">
       <button id="pause-btn" class="primary"><%= t('timer_start') %></button>

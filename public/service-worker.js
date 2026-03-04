@@ -1,11 +1,15 @@
-const CACHE_NAME = 'seven-minutes-cache-v7';
+const CACHE_NAME = 'seven-minutes-cache-v8';
 const OFFLINE_URLS = [
   '/',
   '/home',
+  '/timer',
+  '/settings',
+  '/install',
   '/css/style.css',
   '/js/storage.js',
   '/js/app.js',
   '/js/alarm.js',
+  '/js/i18n.js',
   '/js/home.js',
   '/js/settings.js',
   '/js/timer.js',
@@ -52,7 +56,17 @@ self.addEventListener('fetch', (event) => {
   // For navigations, prefer network and fall back to cached shell.
   if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).catch(() => caches.match('/home') || caches.match('/'))
+      fetch(event.request)
+        .then((res) => {
+          if (res && res.ok && !res.redirected && res.type === 'basic') {
+            const resClone = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, resClone));
+          }
+          return res;
+        })
+        .catch(() =>
+          caches.match(event.request).then((cached) => cached || caches.match('/home') || caches.match('/'))
+        )
     );
     return;
   }

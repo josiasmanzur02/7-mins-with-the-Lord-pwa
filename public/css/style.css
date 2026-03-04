@@ -16,6 +16,22 @@
   --border: 1px solid rgba(15, 118, 110, 0.1);
 }
 
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: local('Space Grotesk'), local('SpaceGrotesk-Regular');
+}
+
+@font-face {
+  font-family: 'DM Sans';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: local('DM Sans'), local('DMSans-Regular');
+}
+
 [data-theme='dark'] {
   --bg: #0c1220;
   --surface: #0f172a;
@@ -39,7 +55,7 @@
 
 body {
   margin: 0;
-  font-family: 'DM Sans', 'Space Grotesk', system-ui, -apple-system, sans-serif;
+  font-family: 'Space Grotesk', 'DM Sans', system-ui, -apple-system, sans-serif;
   background:
     radial-gradient(120% 120% at 12% 12%, rgba(34, 211, 238, 0.12), transparent),
     radial-gradient(95% 95% at 85% 8%, rgba(249, 115, 22, 0.12), transparent),

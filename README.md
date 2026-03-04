@@ -21,6 +21,7 @@ Express + EJS web app (PWA-ready) for guided 7‑minute devotion times with loca
 - Reminder scheduler (best effort while app is open); optional notification if permitted; alarm screen with snooze/start
 - Import/Export/Reset local data
 - PWA: manifest + service worker so it can be “installed” on iOS/Android (Add to Home Screen)
+- Offline: service worker precaches core pages/assets (home, timer, settings, install, JS/CSS) and uses local font fallbacks so the timer works without a connection.
 - Install instructions page at `/install`
 
 ## Verses and copyright

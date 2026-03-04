@@ -27,6 +27,10 @@
         <%= t('settings_volume') %>
         <input type="range" id="sound-volume" min="0" max="1" step="0.05" />
       </label>
+      <div class="controls tight" style="margin-top:8px;">
+        <button type="button" id="sound-test"><%= t('settings_sound_test') %></button>
+        <span class="muted small" id="sound-status"></span>
+      </div>
     </div>
     <div style="align-self:end;">
       <button type="submit"><%= t('settings_save') %></button>

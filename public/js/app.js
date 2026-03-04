@@ -23,7 +23,7 @@ if (navToggle && nav) {
 const AudioManager = (() => {
   let ctx = null;
   let primed = false;
-  let volume = 0.7;
+  let volume = 0.8;
 
   function ensureCtx() {
     if (ctx) return ctx;
@@ -36,7 +36,7 @@ const AudioManager = (() => {
   async function syncVolume() {
     try {
       const state = await window.AppStorage.getState();
-      volume = Number(state.settings.sound.volume ?? 0.7);
+      volume = Number(state.settings.sound.volume ?? 0.8);
     } catch (_) {}
   }
 
@@ -47,7 +47,7 @@ const AudioManager = (() => {
     primed = true;
   }
 
-  function playTone({ freq = 880, duration = 0.35, type = 'sine', gain = 0.07 }) {
+  function playTone({ freq = 880, duration = 0.35, type = 'sine', gain = 0.09 }) {
     if (!primed) return;
     const audio = ensureCtx();
     if (!audio) return;
@@ -67,14 +67,14 @@ const AudioManager = (() => {
     try {
       const state = await window.AppStorage.getState();
       if (!state.settings.sound.enabled) return;
-      volume = Number(state.settings.sound.volume ?? 0.7);
+      volume = Number(state.settings.sound.volume ?? 0.8);
     } catch (_) {
       // keep defaults
     }
 
-    if (name === 'ping') playTone({ freq: 880, duration: 0.28, gain: 0.05 });
-    else if (name === 'finish') playTone({ freq: 660, duration: 0.5, gain: 0.07, type: 'triangle' });
-    else if (name === 'alarm') playTone({ freq: 520, duration: 0.8, gain: 0.12, type: 'square' });
+    if (name === 'ping') playTone({ freq: 880, duration: 0.28, gain: 0.09 });
+    else if (name === 'finish') playTone({ freq: 660, duration: 0.5, gain: 0.12, type: 'triangle' });
+    else if (name === 'alarm') playTone({ freq: 520, duration: 0.8, gain: 0.14, type: 'square' });
   }
 
   return { prime, play, syncVolume };

@@ -4,6 +4,8 @@
   const langSel = document.getElementById('language');
   const soundEnabled = document.getElementById('sound-enabled');
   const soundVolume = document.getElementById('sound-volume');
+  const soundTest = document.getElementById('sound-test');
+  const soundStatus = document.getElementById('sound-status');
   const prefsForm = document.getElementById('prefs-form');
   const dataStatus = document.getElementById('data-status');
   const exportBtn = document.getElementById('export-data');
@@ -22,6 +24,10 @@
     if (dataStatus) dataStatus.textContent = msg;
   }
 
+  function statusSound(msg) {
+    if (soundStatus) soundStatus.textContent = msg || '';
+  }
+
   function renderDays(selected = []) {
     if (!alarmDaysEl) return;
     alarmDaysEl.querySelectorAll('button').forEach((btn) => {
@@ -36,7 +42,7 @@
     if (themeSel) themeSel.value = settings.theme || 'light';
     if (langSel) langSel.value = settings.language || 'en';
     if (soundEnabled) soundEnabled.checked = settings.sound?.enabled ?? true;
-    if (soundVolume) soundVolume.value = settings.sound?.volume ?? 0.7;
+    if (soundVolume) soundVolume.value = settings.sound?.volume ?? 0.8;
     document.documentElement.dataset.theme = settings.theme || 'light';
     document.documentElement.lang = settings.language || 'en';
     const alarm = settings.alarm || {};
@@ -69,7 +75,7 @@
         s.settings.theme = themeSel ? themeSel.value : 'light';
         s.settings.language = langSel ? langSel.value : 'en';
         s.settings.sound.enabled = soundEnabled ? soundEnabled.checked : true;
-        s.settings.sound.volume = soundVolume ? Number(soundVolume.value || 0.7) : 0.7;
+        s.settings.sound.volume = soundVolume ? Number(soundVolume.value || 0.8) : 0.8;
         return s;
       });
       await window.AudioManager?.syncVolume();
@@ -81,6 +87,31 @@
       if (prevLang !== nextLang) {
         window.location.reload();
       }
+    });
+  }
+
+  if (soundTest) {
+    soundTest.addEventListener('click', async () => {
+      try {
+        const state = await window.AppStorage.getState();
+        if (!state.settings.sound.enabled) {
+          statusSound(t('settings_sound_disabled'));
+          return;
+        }
+      } catch (_) {
+        // keep going with defaults
+      }
+
+      const Ctor = window.AudioContext || window.webkitAudioContext;
+      if (!Ctor) {
+        statusSound(t('settings_sound_context'));
+        return;
+      }
+
+      window.AudioManager?.prime();
+      window.AudioManager?.play('ping');
+      statusSound(t('settings_sound_test_ok'));
+      setTimeout(() => statusSound(''), 2500);
     });
   }
 

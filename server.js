@@ -37,6 +37,10 @@ const translations = {
     settings_sound: 'Sound',
     settings_sound_enable: 'Play sounds',
     settings_volume: 'Volume',
+    settings_sound_test: 'Test sound',
+    settings_sound_test_ok: 'Sound played.',
+    settings_sound_disabled: 'Sounds are disabled.',
+    settings_sound_context: 'Tap anywhere to enable audio.',
     settings_alarm: 'Reminders',
     settings_alarm_hint: 'Best effort while the app is open. Notifications depend on browser permission. iOS PWAs cannot ring in the background.',
     settings_alarm_time: 'Reminder time',
@@ -75,6 +79,7 @@ const translations = {
 
     timer_focus: 'Focused time',
     timer_tip: 'Tip: stay with the short timer; it keeps the flow moving.',
+    timer_next_up: 'Next: {{label}} in {{seconds}}s',
     timer_start: 'Start',
     timer_pause: 'Pause',
     timer_resume: 'Resume',
@@ -136,6 +141,10 @@ const translations = {
     settings_sound: 'Sonido',
     settings_sound_enable: 'Reproducir sonidos',
     settings_volume: 'Volumen',
+    settings_sound_test: 'Probar sonido',
+    settings_sound_test_ok: 'Sonido reproducido.',
+    settings_sound_disabled: 'El sonido está desactivado.',
+    settings_sound_context: 'Toca la pantalla para habilitar el audio.',
     settings_alarm: 'Recordatorios',
     settings_alarm_hint: 'Mejor esfuerzo mientras la app está abierta. Las notificaciones dependen del permiso del navegador. Las PWA en iOS no pueden sonar en segundo plano.',
     settings_alarm_time: 'Hora del recordatorio',
@@ -174,6 +183,7 @@ const translations = {
 
     timer_focus: 'Tiempo enfocado',
     timer_tip: 'Consejo: quédate con el temporizador corto para mantener el ritmo.',
+    timer_next_up: 'Siguiente: {{label}} en {{seconds}}s',
     timer_start: 'Iniciar',
     timer_pause: 'Pausar',
     timer_resume: 'Reanudar',
@@ -274,12 +284,12 @@ app.get('/home', async (req, res) => {
 
 app.get('/timer', (req, res) => {
   const steps = [
-    { key: 'calling', label: translate(res.locals.lang, 'step_calling'), seconds: 60 },
+    { key: 'calling', label: translate(res.locals.lang, 'step_calling'), seconds: 30 },
     { key: 'pray', label: translate(res.locals.lang, 'step_pray'), seconds: 60 },
-    { key: 'pray-read', label: translate(res.locals.lang, 'step_pray_read'), seconds: 60 },
+    { key: 'pray-read', label: translate(res.locals.lang, 'step_pray_read'), seconds: 150 },
     { key: 'confession', label: translate(res.locals.lang, 'step_confession'), seconds: 60 },
-    { key: 'consecration', label: translate(res.locals.lang, 'step_consecration'), seconds: 60 },
-    { key: 'thanks', label: translate(res.locals.lang, 'step_thanks'), seconds: 60 },
+    { key: 'consecration', label: translate(res.locals.lang, 'step_consecration'), seconds: 30 },
+    { key: 'thanks', label: translate(res.locals.lang, 'step_thanks'), seconds: 30 },
     { key: 'petition', label: translate(res.locals.lang, 'step_petition'), seconds: 60 },
   ];
   res.render('timer', { steps, bodyClass: 'page-timer' });
