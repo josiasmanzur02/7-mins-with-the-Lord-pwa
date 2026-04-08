@@ -283,31 +283,35 @@ const AudioManager = (() => {
   }
 
   async function warmAssetMedia() {
-    const element = ensureAssetEl('ping');
-    if (!element) return false;
+    const elements = Object.values(ensureAssetEls());
+    if (!elements.length) return false;
 
-    try {
-      element.pause();
-      element.muted = true;
-      element.volume = 0;
+    let warmed = false;
+    for (const element of elements) {
       try {
-        element.currentTime = 0;
-      } catch (_) {}
-      const playPromise = element.play();
-      if (playPromise) await playPromise;
-      element.pause();
-      try {
-        element.currentTime = 0;
-      } catch (_) {}
-      element.muted = false;
-      element.volume = volume;
-      primed = true;
-      return true;
-    } catch (_) {
-      element.muted = false;
-      element.volume = volume;
-      return false;
+        element.pause();
+        element.muted = true;
+        element.volume = 0;
+        try {
+          element.currentTime = 0;
+        } catch (_) {}
+        const playPromise = element.play();
+        if (playPromise) await playPromise;
+        element.pause();
+        try {
+          element.currentTime = 0;
+        } catch (_) {}
+        element.muted = false;
+        element.volume = volume;
+        warmed = true;
+      } catch (_) {
+        element.muted = false;
+        element.volume = volume;
+      }
     }
+
+    primed = primed || warmed;
+    return warmed;
   }
 
   async function syncVolume() {

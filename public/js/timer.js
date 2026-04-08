@@ -182,11 +182,11 @@
   }
 
   function handleStepComplete() {
-    window.AudioManager?.play('ping');
     if (index + 1 >= steps.length) {
       finish();
       return;
     }
+    window.AudioManager?.play('finish');
     enterTransition();
   }
 
