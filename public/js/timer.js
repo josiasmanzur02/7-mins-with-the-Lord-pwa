@@ -148,6 +148,7 @@
   }
 
   function start() {
+    void window.AudioManager?.playInteractive?.('ping');
     void window.AudioManager?.arm?.(['ping', 'finish']);
     window.AudioManager?.prime();
     if (ticker) clearInterval(ticker);

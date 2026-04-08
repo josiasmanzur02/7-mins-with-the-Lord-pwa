@@ -1,4 +1,4 @@
-const CACHE_NAME = 'seven-minutes-cache-v24';
+const CACHE_NAME = 'seven-minutes-cache-v25';
 const OFFLINE_URLS = [
   '/',
   '/home',
