@@ -42,9 +42,9 @@
     if (themeSel) themeSel.value = settings.theme || 'light';
     if (langSel) langSel.value = settings.language || 'en';
     if (soundEnabled) soundEnabled.checked = settings.sound?.enabled ?? true;
-    if (soundVolume) soundVolume.value = settings.sound?.volume ?? 0.8;
-    document.documentElement.dataset.theme = settings.theme || 'light';
-    document.documentElement.lang = settings.language || 'en';
+    if (soundVolume) soundVolume.value = settings.sound?.volume ?? 1;
+    window.applyAppTheme?.(settings.theme || 'light', settings.language || 'en');
+    window.AudioManager?.applyVolume?.(settings.sound?.volume ?? 1);
     const alarm = settings.alarm || {};
     if (alarmEnabled) alarmEnabled.checked = !!alarm.enabled;
     if (alarmTime) alarmTime.value = alarm.time || '07:00';
@@ -75,13 +75,12 @@
         s.settings.theme = themeSel ? themeSel.value : 'light';
         s.settings.language = langSel ? langSel.value : 'en';
         s.settings.sound.enabled = soundEnabled ? soundEnabled.checked : true;
-        s.settings.sound.volume = soundVolume ? Number(soundVolume.value || 0.8) : 0.8;
+        s.settings.sound.volume = soundVolume ? Number(soundVolume.value || 1) : 1;
         return s;
       });
       await window.AudioManager?.syncVolume();
-      document.documentElement.dataset.theme = themeSel ? themeSel.value : 'light';
       const nextLang = langSel ? langSel.value : 'en';
-      document.documentElement.lang = nextLang;
+      window.applyAppTheme?.(themeSel ? themeSel.value : 'light', nextLang);
       document.cookie = `lang=${nextLang}; path=/; max-age=31536000; SameSite=Lax`;
       status(t('settings_saved'));
       if (prevLang !== nextLang) {
@@ -90,26 +89,29 @@
     });
   }
 
+  if (soundVolume) {
+    soundVolume.addEventListener('input', () => {
+      window.AudioManager?.applyVolume?.(soundVolume.value || 1);
+    });
+  }
+
   if (soundTest) {
     soundTest.addEventListener('click', async () => {
-      try {
-        const state = await window.AppStorage.getState();
-        if (!state.settings.sound.enabled) {
-          statusSound(t('settings_sound_disabled'));
-          return;
-        }
-      } catch (_) {
-        // keep going with defaults
+      if (soundEnabled && !soundEnabled.checked) {
+        statusSound(t('settings_sound_disabled'));
+        return;
       }
 
       const Ctor = window.AudioContext || window.webkitAudioContext;
-      if (!Ctor) {
+      if (!Ctor && typeof Audio === 'undefined') {
         statusSound(t('settings_sound_context'));
         return;
       }
 
-      await window.AudioManager?.prime?.();
-      const played = await window.AudioManager?.play?.('ping');
+      const played = await window.AudioManager?.playInteractive?.('ping', {
+        respectSetting: false,
+        volumeOverride: soundVolume ? Number(soundVolume.value || 1) : 1,
+      });
       statusSound(played ? t('settings_sound_test_ok') : t('settings_sound_context'));
       setTimeout(() => statusSound(''), 2500);
     });

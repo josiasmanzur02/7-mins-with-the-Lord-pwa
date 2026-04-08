@@ -19,18 +19,60 @@ if (navToggle && nav) {
   });
 }
 
+const APP_THEME_COLORS = {
+  light: '#f3f7fb',
+  dark: '#0c1220',
+};
+
+function applyAppTheme(theme = 'light', language = document.documentElement.lang || 'en') {
+  const nextTheme = theme === 'dark' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = nextTheme;
+  document.documentElement.lang = language || 'en';
+  document.documentElement.style.colorScheme = nextTheme;
+
+  const themeMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeMeta) {
+    themeMeta.setAttribute('content', APP_THEME_COLORS[nextTheme]);
+  }
+}
+
+window.applyAppTheme = applyAppTheme;
+
 // Audio manager shared across pages
 const AudioManager = (() => {
+  const SAMPLE_RATE = 44100;
+  const SOUND_PATTERNS = {
+    silent: [{ freq: 440, duration: 0.04, gain: 0, type: 'sine' }],
+    ping: [
+      { freq: 1174, duration: 0.14, gain: 0.82, type: 'triangle' },
+      { freq: 1568, duration: 0.22, gain: 0.36, type: 'sine', detune: 4 },
+      { at: 0.08, freq: 1318, duration: 0.18, gain: 0.58, type: 'triangle' },
+    ],
+    finish: [
+      { freq: 880, duration: 0.16, gain: 0.68, type: 'triangle' },
+      { at: 0.11, freq: 1174, duration: 0.2, gain: 0.62, type: 'triangle' },
+      { at: 0.24, freq: 1568, duration: 0.32, gain: 0.56, type: 'sine' },
+    ],
+    alarm: [
+      { freq: 988, duration: 0.16, gain: 0.82, type: 'square' },
+      { at: 0.18, freq: 1318, duration: 0.16, gain: 0.74, type: 'square' },
+      { at: 0.42, freq: 988, duration: 0.16, gain: 0.82, type: 'square' },
+      { at: 0.62, freq: 1318, duration: 0.2, gain: 0.74, type: 'square' },
+    ],
+  };
+
   let ctx = null;
   let primed = false;
-  let volume = 0.8;
+  let volume = 1;
   let compressor = null;
   let masterGain = null;
   let primingPromise = null;
+  let mediaEl = null;
+  let soundUrls = null;
 
   function clampVolume(value) {
     const next = Number(value);
-    if (!Number.isFinite(next)) return 0.8;
+    if (!Number.isFinite(next)) return 1;
     return Math.max(0, Math.min(1, next));
   }
 
@@ -66,6 +108,92 @@ const AudioManager = (() => {
     return { compressor, masterGain };
   }
 
+  function ensureMediaEl() {
+    if (mediaEl) return mediaEl;
+    const element = new Audio();
+    element.preload = 'auto';
+    element.playsInline = true;
+    element.setAttribute('playsinline', '');
+    mediaEl = element;
+    return mediaEl;
+  }
+
+  function sampleForType(type, phase) {
+    if (type === 'square') return Math.sin(phase) >= 0 ? 1 : -1;
+    if (type === 'triangle') return (2 / Math.PI) * Math.asin(Math.sin(phase));
+    return Math.sin(phase);
+  }
+
+  function writeAscii(view, offset, value) {
+    for (let i = 0; i < value.length; i += 1) {
+      view.setUint8(offset + i, value.charCodeAt(i));
+    }
+  }
+
+  function renderWaveBuffer(voices) {
+    const totalDuration = voices.reduce(
+      (max, voice) => Math.max(max, (voice.at || 0) + (voice.duration || 0.2) + 0.08),
+      0.1
+    );
+    const totalSamples = Math.max(1, Math.ceil(totalDuration * SAMPLE_RATE));
+    const samples = new Float32Array(totalSamples);
+
+    voices.forEach((voice) => {
+      const start = Math.floor((voice.at || 0) * SAMPLE_RATE);
+      const durationSamples = Math.max(1, Math.floor((voice.duration || 0.2) * SAMPLE_RATE));
+      const attack = Math.max(1, Math.floor(Math.min(0.008, (voice.duration || 0.2) / 4) * SAMPLE_RATE));
+      const release = Math.max(1, Math.floor(Math.min(0.05, (voice.duration || 0.2) / 2) * SAMPLE_RATE));
+      const freq = (voice.freq || 440) * Math.pow(2, (voice.detune || 0) / 1200);
+
+      for (let i = 0; i < durationSamples && start + i < totalSamples; i += 1) {
+        let env = 1;
+        if (i < attack) env = i / attack;
+        else if (i > durationSamples - release) env = Math.max(0, (durationSamples - i) / release);
+
+        const phase = 2 * Math.PI * freq * (i / SAMPLE_RATE);
+        samples[start + i] += sampleForType(voice.type || 'sine', phase) * env * (voice.gain || 0.5);
+      }
+    });
+
+    let peak = 0;
+    for (let i = 0; i < samples.length; i += 1) {
+      peak = Math.max(peak, Math.abs(samples[i]));
+    }
+    const scale = peak > 0 ? 0.92 / peak : 1;
+
+    const buffer = new ArrayBuffer(44 + totalSamples * 2);
+    const view = new DataView(buffer);
+    writeAscii(view, 0, 'RIFF');
+    view.setUint32(4, 36 + totalSamples * 2, true);
+    writeAscii(view, 8, 'WAVE');
+    writeAscii(view, 12, 'fmt ');
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, SAMPLE_RATE, true);
+    view.setUint32(28, SAMPLE_RATE * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    writeAscii(view, 36, 'data');
+    view.setUint32(40, totalSamples * 2, true);
+
+    for (let i = 0; i < totalSamples; i += 1) {
+      const sample = Math.max(-1, Math.min(1, samples[i] * scale));
+      view.setInt16(44 + i * 2, Math.round(sample * 32767), true);
+    }
+
+    return buffer;
+  }
+
+  function ensureSoundUrls() {
+    if (soundUrls) return soundUrls;
+    soundUrls = {};
+    Object.entries(SOUND_PATTERNS).forEach(([name, voices]) => {
+      soundUrls[name] = URL.createObjectURL(new Blob([renderWaveBuffer(voices)], { type: 'audio/wav' }));
+    });
+    return soundUrls;
+  }
+
   async function resumeAudio(audio = ensureCtx()) {
     if (!audio) return false;
     ensureOutput(audio);
@@ -98,11 +226,36 @@ const AudioManager = (() => {
     return primed;
   }
 
+  async function warmMediaElement() {
+    const urls = ensureSoundUrls();
+    const element = ensureMediaEl();
+    try {
+      if (element.src !== urls.silent) {
+        element.src = urls.silent;
+        element.load();
+      }
+      element.volume = 0.001;
+      const playPromise = element.play();
+      if (playPromise) await playPromise;
+      element.pause();
+      element.currentTime = 0;
+      primed = true;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   async function syncVolume() {
     try {
       const state = await window.AppStorage.getState();
-      volume = clampVolume(state.settings.sound.volume ?? 0.8);
+      volume = clampVolume(state.settings.sound.volume ?? 1);
     } catch (_) {}
+    return volume;
+  }
+
+  function applyVolume(nextVolume) {
+    volume = clampVolume(nextVolume);
     return volume;
   }
 
@@ -110,15 +263,17 @@ const AudioManager = (() => {
     if (primingPromise) return primingPromise;
     primingPromise = (async () => {
       const audio = ensureCtx();
-      if (!audio) return false;
-      return resumeAudio(audio);
+      const webReady = await resumeAudio(audio);
+      const mediaReady = primed ? true : await warmMediaElement();
+      primed = webReady || mediaReady || primed;
+      return primed;
     })().finally(() => {
       primingPromise = null;
     });
     return primingPromise;
   }
 
-  function playVoice(audio, { at = 0, freq = 880, duration = 0.24, type = 'triangle', gain = 0.2, detune = 0 }) {
+  function playVoice(audio, { at = 0, freq = 880, duration = 0.24, type = 'triangle', gain = 0.2, detune = 0 }, level = volume) {
     if (!audio) return;
     ensureOutput(audio);
     const when = audio.currentTime + at;
@@ -130,7 +285,7 @@ const AudioManager = (() => {
     if (detune) osc.detune.setValueAtTime(detune, when);
 
     g.gain.setValueAtTime(0.00001, when);
-    g.gain.linearRampToValueAtTime(gain * volume, when + 0.01);
+    g.gain.linearRampToValueAtTime(gain * level, when + 0.01);
     g.gain.exponentialRampToValueAtTime(0.00001, when + duration);
 
     osc.connect(g);
@@ -139,54 +294,88 @@ const AudioManager = (() => {
     osc.stop(when + duration + 0.03);
   }
 
-  function playPattern(audio, voices) {
-    voices.forEach((voice) => playVoice(audio, voice));
+  function playPattern(audio, voices, level = volume) {
+    voices.forEach((voice) => playVoice(audio, voice, level));
   }
 
-  async function play(name) {
-    let soundEnabled = true;
-    try {
-      const state = await window.AppStorage.getState();
-      soundEnabled = state.settings.sound.enabled !== false;
-      volume = clampVolume(state.settings.sound.volume ?? 0.8);
-    } catch (_) {
-      // keep defaults
-    }
-
-    if (!soundEnabled) return false;
-
+  function playWeb(name, level = volume) {
     const audio = ensureCtx();
-    if (!audio) return false;
-    const ready = await resumeAudio(audio);
-    if (!ready) return false;
-
-    if (name === 'ping') {
-      playPattern(audio, [
-        { freq: 1174, duration: 0.18, gain: 0.22, type: 'triangle' },
-        { freq: 1568, duration: 0.24, gain: 0.14, type: 'sine', detune: 4 },
-        { at: 0.11, freq: 1318, duration: 0.2, gain: 0.18, type: 'triangle' },
-      ]);
-    } else if (name === 'finish') {
-      playPattern(audio, [
-        { freq: 880, duration: 0.18, gain: 0.2, type: 'triangle' },
-        { at: 0.12, freq: 1174, duration: 0.22, gain: 0.18, type: 'triangle' },
-        { at: 0.26, freq: 1568, duration: 0.34, gain: 0.18, type: 'sine' },
-      ]);
-    } else if (name === 'alarm') {
-      playPattern(audio, [
-        { freq: 988, duration: 0.16, gain: 0.24, type: 'square' },
-        { at: 0.18, freq: 1318, duration: 0.16, gain: 0.22, type: 'square' },
-        { at: 0.42, freq: 988, duration: 0.16, gain: 0.24, type: 'square' },
-        { at: 0.6, freq: 1318, duration: 0.18, gain: 0.22, type: 'square' },
-      ]);
-    } else {
-      return false;
-    }
-
+    const voices = SOUND_PATTERNS[name];
+    if (!audio || !voices || name === 'silent') return false;
+    playPattern(audio, voices, level);
     return true;
   }
 
-  return { prime, play, syncVolume };
+  async function playMedia(name, level = volume) {
+    const urls = ensureSoundUrls();
+    const src = urls[name];
+    if (!src || name === 'silent') return false;
+    const element = ensureMediaEl();
+
+    try {
+      element.pause();
+      if (element.src !== src) {
+        element.src = src;
+        element.load();
+      } else {
+        element.currentTime = 0;
+      }
+      element.volume = Math.max(0.12, Math.min(1, 0.55 + level * 0.45));
+      const playPromise = element.play();
+      if (playPromise) await playPromise;
+      primed = true;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function play(name, options = {}) {
+    const requestedVolume =
+      options.volumeOverride !== undefined && options.volumeOverride !== null
+        ? clampVolume(options.volumeOverride)
+        : null;
+    let soundEnabled = true;
+    try {
+      if (options.respectSetting !== false) {
+        const state = await window.AppStorage.getState();
+        soundEnabled = state.settings.sound.enabled !== false;
+        volume = requestedVolume ?? clampVolume(state.settings.sound.volume ?? 1);
+      } else if (requestedVolume !== null) {
+        volume = requestedVolume;
+      }
+    } catch (_) {
+      if (requestedVolume !== null) volume = requestedVolume;
+    }
+
+    if (!soundEnabled) return false;
+    const level = requestedVolume ?? volume;
+
+    await prime();
+
+    if (await playMedia(name, level)) return true;
+
+    const audio = ensureCtx();
+    const ready = await resumeAudio(audio);
+    if (!ready) return false;
+    return playWeb(name, level);
+  }
+
+  async function playInteractive(name, options = {}) {
+    const requestedVolume =
+      options.volumeOverride !== undefined && options.volumeOverride !== null
+        ? clampVolume(options.volumeOverride)
+        : volume;
+    volume = requestedVolume;
+    await prime();
+    if (await playMedia(name, requestedVolume)) return true;
+    const audio = ensureCtx();
+    const ready = await resumeAudio(audio);
+    if (!ready) return false;
+    return playWeb(name, requestedVolume);
+  }
+
+  return { prime, play, playInteractive, syncVolume, applyVolume };
 })();
 
 window.AudioManager = AudioManager;
@@ -212,8 +401,7 @@ window.addEventListener('pageshow', () => {
 (async () => {
   try {
     const state = await window.AppStorage.getState();
-    document.documentElement.dataset.theme = state.settings.theme || 'light';
-    document.documentElement.lang = state.settings.language || 'en';
+    applyAppTheme(state.settings.theme || 'light', state.settings.language || 'en');
     await AudioManager.syncVolume();
   } catch (e) {
     // ignore and keep defaults

@@ -11,7 +11,7 @@
     settings: {
       theme: 'light',
       language: 'en',
-      sound: { enabled: true, volume: 0.8 },
+      sound: { enabled: true, volume: 1 },
       alarm: {
         enabled: false,
         time: '07:00',
