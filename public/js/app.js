@@ -72,10 +72,13 @@ const AudioManager = (() => {
   let compressor = null;
   let masterGain = null;
   let primingPromise = null;
-  let mediaEl = null;
   let assetEls = null;
+  let assetBuffers = null;
+  let assetBufferPromises = null;
+  let mediaEl = null;
   let soundUrls = null;
   let activeMediaSrc = '';
+  const preloadedAssetSrcs = new Set();
 
   function clampVolume(value) {
     const next = Number(value);
@@ -143,7 +146,28 @@ const AudioManager = (() => {
     return elements[name] || null;
   }
 
+  function ensureAssetBuffers() {
+    if (assetBuffers) return assetBuffers;
+    assetBuffers = Object.create(null);
+    return assetBuffers;
+  }
+
+  function ensureAssetBufferPromises() {
+    if (assetBufferPromises) return assetBufferPromises;
+    assetBufferPromises = Object.create(null);
+    return assetBufferPromises;
+  }
+
   function preloadAssets() {
+    Object.values(ASSET_SOUND_SRCS).forEach((src) => {
+      if (preloadedAssetSrcs.has(src)) return;
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'audio';
+      link.href = src;
+      document.head.appendChild(link);
+      preloadedAssetSrcs.add(src);
+    });
     Object.values(ensureAssetEls()).forEach((element) => {
       try {
         element.load();
@@ -282,36 +306,59 @@ const AudioManager = (() => {
     }
   }
 
-  async function warmAssetMedia() {
-    const elements = Object.values(ensureAssetEls());
-    if (!elements.length) return false;
+  function decodeAudioBuffer(audio, rawBuffer) {
+    if (!audio || !rawBuffer) return Promise.resolve(null);
 
-    let warmed = false;
-    for (const element of elements) {
+    const decodeTarget = rawBuffer.slice(0);
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = (buffer) => {
+        if (settled) return;
+        settled = true;
+        resolve(buffer || null);
+      };
+
       try {
-        element.pause();
-        element.muted = true;
-        element.volume = 0;
-        try {
-          element.currentTime = 0;
-        } catch (_) {}
-        const playPromise = element.play();
-        if (playPromise) await playPromise;
-        element.pause();
-        try {
-          element.currentTime = 0;
-        } catch (_) {}
-        element.muted = false;
-        element.volume = volume;
-        warmed = true;
-      } catch (_) {
-        element.muted = false;
-        element.volume = volume;
-      }
-    }
+        const maybePromise = audio.decodeAudioData(
+          decodeTarget,
+          (buffer) => finish(buffer),
+          () => finish(null)
+        );
 
-    primed = primed || warmed;
-    return warmed;
+        if (maybePromise && typeof maybePromise.then === 'function') {
+          maybePromise.then((buffer) => finish(buffer)).catch(() => finish(null));
+        }
+      } catch (_) {
+        finish(null);
+      }
+    });
+  }
+
+  async function loadAssetBuffer(name, audio = ensureCtx()) {
+    if (!audio || !ASSET_SOUND_SRCS[name]) return null;
+
+    const buffers = ensureAssetBuffers();
+    if (buffers[name]) return buffers[name];
+
+    const pending = ensureAssetBufferPromises();
+    if (pending[name]) return pending[name];
+
+    pending[name] = fetch(ASSET_SOUND_SRCS[name], { cache: 'force-cache' })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Failed to load audio asset: ${name}`);
+        return response.arrayBuffer();
+      })
+      .then((rawBuffer) => decodeAudioBuffer(audio, rawBuffer))
+      .then((decoded) => {
+        if (decoded) buffers[name] = decoded;
+        return decoded || null;
+      })
+      .catch(() => null)
+      .finally(() => {
+        delete pending[name];
+      });
+
+    return pending[name];
   }
 
   async function syncVolume() {
@@ -332,15 +379,64 @@ const AudioManager = (() => {
     primingPromise = (async () => {
       preloadAssets();
       const audio = ensureCtx();
-      const assetReady = primed ? true : await warmAssetMedia();
       const webReady = await resumeAudio(audio);
-      const mediaReady = assetReady || primed || (await warmMediaElement());
+      const mediaReady = primed || (await warmMediaElement());
+      if (webReady && audio) {
+        void Promise.all(Object.keys(ASSET_SOUND_SRCS).map((name) => loadAssetBuffer(name, audio)));
+      }
       primed = webReady || mediaReady || primed;
       return primed;
     })().finally(() => {
       primingPromise = null;
     });
     return primingPromise;
+  }
+
+  async function arm(names = Object.keys(ASSET_SOUND_SRCS)) {
+    preloadAssets();
+    const targetNames = [...new Set(names)].filter((name) => !!ASSET_SOUND_SRCS[name]);
+    if (!targetNames.length) {
+      void prime();
+      return false;
+    }
+
+    const audio = ensureCtx();
+    const ready = await prime();
+    const warmResults = await Promise.all(
+      targetNames.map(async (name) => {
+        const element = ensureAssetEl(name);
+        if (!element) return false;
+        try {
+          element.pause();
+          element.muted = true;
+          element.volume = 0;
+          try {
+            element.currentTime = 0;
+          } catch (_) {}
+          const playPromise = element.play();
+          if (playPromise) await playPromise;
+          element.pause();
+          try {
+            element.currentTime = 0;
+          } catch (_) {}
+          element.muted = false;
+          element.volume = Math.max(0.12, Math.min(1, 0.55 + volume * 0.45));
+          primed = true;
+          return true;
+        } catch (_) {
+          element.muted = false;
+          element.volume = Math.max(0.12, Math.min(1, 0.55 + volume * 0.45));
+          return false;
+        }
+      })
+    );
+
+    const bufferResults =
+      audio && ready
+        ? await Promise.all(targetNames.map((name) => loadAssetBuffer(name, audio)))
+        : [];
+
+    return warmResults.some(Boolean) || bufferResults.some(Boolean);
   }
 
   function playVoice(audio, { at = 0, freq = 880, duration = 0.24, type = 'triangle', gain = 0.2, detune = 0 }, level = volume) {
@@ -413,7 +509,7 @@ const AudioManager = (() => {
     try {
       element.pause();
       element.muted = false;
-      element.volume = level;
+      element.volume = Math.max(0.12, Math.min(1, 0.55 + level * 0.45));
       try {
         element.currentTime = 0;
       } catch (_) {}
@@ -426,12 +522,40 @@ const AudioManager = (() => {
     }
   }
 
+  function playBuffer(name, level = volume, audio = ensureCtx()) {
+    if (!audio) return false;
+    const buffers = ensureAssetBuffers();
+    const buffer = buffers[name];
+    if (!buffer) return false;
+
+    ensureOutput(audio);
+    try {
+      const source = audio.createBufferSource();
+      const gain = audio.createGain();
+      gain.gain.setValueAtTime(Math.max(0.12, Math.min(1, 0.55 + level * 0.45)), audio.currentTime);
+      source.buffer = buffer;
+      source.connect(gain);
+      gain.connect(compressor || audio.destination);
+      source.start(audio.currentTime);
+      primed = true;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   async function playMedia(name, level = volume) {
     if (name === 'silent') {
       return playSource(ensureSoundUrls().silent, level);
     }
 
+    if (playBuffer(name, level)) return true;
+    if (ASSET_SOUND_SRCS[name]) {
+      const loaded = await loadAssetBuffer(name);
+      if (loaded && playBuffer(name, level)) return true;
+    }
     if (ASSET_SOUND_SRCS[name] && (await playAsset(name, level))) return true;
+    if (ASSET_SOUND_SRCS[name] && (await playSource(ASSET_SOUND_SRCS[name], level))) return true;
 
     const generatedSrc = ensureSoundUrls()[name];
     if (!generatedSrc) return false;
@@ -487,7 +611,7 @@ const AudioManager = (() => {
     return playWeb(name, requestedVolume);
   }
 
-  return { prime, play, playInteractive, syncVolume, applyVolume };
+  return { prime, arm, play, playInteractive, syncVolume, applyVolume };
 })();
 
 window.AudioManager = AudioManager;

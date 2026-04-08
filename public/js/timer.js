@@ -127,7 +127,6 @@
       transitionRemaining -= 1;
       if (transitionRemaining <= 0) {
         transitionRemaining = 0;
-        setTimerDisplay(transitionRemaining);
         beginNextStep();
         return;
       }
@@ -140,10 +139,16 @@
       return;
     }
     remaining -= 1;
+    if (remaining <= 0) {
+      remaining = 0;
+      handleStepComplete();
+      return;
+    }
     setTimerDisplay(remaining);
   }
 
   function start() {
+    void window.AudioManager?.arm?.(['ping', 'finish']);
     window.AudioManager?.prime();
     if (ticker) clearInterval(ticker);
     ticker = setInterval(tick, 1000);

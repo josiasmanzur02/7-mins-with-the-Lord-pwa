@@ -292,7 +292,7 @@ app.get('/home', async (req, res) => {
 
 app.get('/timer', (req, res) => {
   const steps = [
-    { key: 'calling', label: translate(res.locals.lang, 'step_calling'), seconds: 30 },
+    { key: 'calling', label: translate(res.locals.lang, 'step_calling'), seconds: 30 }, 
     { key: 'pray', label: translate(res.locals.lang, 'step_pray'), seconds: 60 },
     { key: 'pray-read', label: translate(res.locals.lang, 'step_pray_read'), seconds: 150 },
     { key: 'confession', label: translate(res.locals.lang, 'step_confession'), seconds: 60 },
