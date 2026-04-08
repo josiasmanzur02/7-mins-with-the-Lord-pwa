@@ -41,6 +41,11 @@ window.applyAppTheme = applyAppTheme;
 // Audio manager shared across pages
 const AudioManager = (() => {
   const SAMPLE_RATE = 44100;
+  const ASSET_SOUND_SRCS = {
+    ping: '/audio/ping.mp3',
+    finish: '/audio/finish.mp3',
+    alarm: '/audio/alarm.mp3',
+  };
   const SOUND_PATTERNS = {
     silent: [{ freq: 440, duration: 0.04, gain: 0, type: 'sine' }],
     ping: [
@@ -69,6 +74,8 @@ const AudioManager = (() => {
   let primingPromise = null;
   let mediaEl = null;
   let soundUrls = null;
+  let activeMediaSrc = '';
+  let assetAvailability = Object.create(null);
 
   function clampVolume(value) {
     const next = Number(value);
@@ -230,8 +237,9 @@ const AudioManager = (() => {
     const urls = ensureSoundUrls();
     const element = ensureMediaEl();
     try {
-      if (element.src !== urls.silent) {
+      if (activeMediaSrc !== urls.silent) {
         element.src = urls.silent;
+        activeMediaSrc = urls.silent;
         element.load();
       }
       element.volume = 0.001;
@@ -306,16 +314,15 @@ const AudioManager = (() => {
     return true;
   }
 
-  async function playMedia(name, level = volume) {
-    const urls = ensureSoundUrls();
-    const src = urls[name];
-    if (!src || name === 'silent') return false;
+  async function playSource(src, level = volume) {
+    if (!src) return false;
     const element = ensureMediaEl();
 
     try {
       element.pause();
-      if (element.src !== src) {
+      if (activeMediaSrc !== src) {
         element.src = src;
+        activeMediaSrc = src;
         element.load();
       } else {
         element.currentTime = 0;
@@ -326,8 +333,33 @@ const AudioManager = (() => {
       primed = true;
       return true;
     } catch (_) {
+      if (activeMediaSrc === src) {
+        element.removeAttribute('src');
+        element.load();
+        activeMediaSrc = '';
+      }
       return false;
     }
+  }
+
+  async function playMedia(name, level = volume) {
+    if (name === 'silent') {
+      return playSource(ensureSoundUrls().silent, level);
+    }
+
+    const assetSrc = ASSET_SOUND_SRCS[name];
+    if (assetSrc && assetAvailability[name] !== false) {
+      const playedAsset = await playSource(assetSrc, level);
+      if (playedAsset) {
+        assetAvailability[name] = true;
+        return true;
+      }
+      assetAvailability[name] = false;
+    }
+
+    const generatedSrc = ensureSoundUrls()[name];
+    if (!generatedSrc) return false;
+    return playSource(generatedSrc, level);
   }
 
   async function play(name, options = {}) {
