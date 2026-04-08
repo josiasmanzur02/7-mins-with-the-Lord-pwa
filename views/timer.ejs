@@ -15,7 +15,7 @@
       <button id="back-btn" class="ghost"><%= t('timer_back') %></button>
       <button id="exit-btn" class="ghost danger-ghost"><%= t('timer_exit') %></button>
     </div>
-    <p class="muted" id="status"></p>
+    <p class="muted" id="status" hidden></p>
   </div>
 
   <div class="timer-details">
@@ -33,6 +33,20 @@
           </li>
         <% }) %>
       </ul>
+    </div>
+  </div>
+
+  <div id="wait-overlay" class="wait-overlay" hidden aria-hidden="true">
+    <div
+      class="wait-overlay-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-label="<%= t('timer_waiting_label') %>"
+      aria-describedby="wait-overlay-next"
+    >
+      <div class="wait-overlay-timer"><%= `00:${String(10).padStart(2, '0')}` %></div>
+      <p class="wait-overlay-next-label"><%= t('timer_next_short') %></p>
+      <p id="wait-overlay-next" class="wait-overlay-next"></p>
     </div>
   </div>
 </div>

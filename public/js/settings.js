@@ -108,9 +108,9 @@
         return;
       }
 
-      window.AudioManager?.prime();
-      window.AudioManager?.play('ping');
-      statusSound(t('settings_sound_test_ok'));
+      await window.AudioManager?.prime?.();
+      const played = await window.AudioManager?.play?.('ping');
+      statusSound(played ? t('settings_sound_test_ok') : t('settings_sound_context'));
       setTimeout(() => statusSound(''), 2500);
     });
   }

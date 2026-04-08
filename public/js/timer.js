@@ -11,6 +11,9 @@
   const verseBox = document.querySelector('.verse-primary');
   const titleEl = document.querySelector('.step-title');
   const timerEl = document.querySelector('.timer-display');
+  const waitOverlayEl = document.getElementById('wait-overlay');
+  const waitOverlayTimerEl = document.querySelector('.wait-overlay-timer');
+  const waitOverlayNextEl = document.querySelector('.wait-overlay-next');
   const listItems = Array.from(document.querySelectorAll('.step-row'));
   const pauseBtn = document.getElementById('pause-btn');
   const backBtn = document.getElementById('back-btn');
@@ -55,14 +58,45 @@
     return `${m}:${s}`;
   }
 
+  function setStatus(message = '') {
+    if (!statusEl) return;
+    statusEl.textContent = message;
+    statusEl.hidden = !message;
+  }
+
+  function setTimerDisplay(seconds) {
+    const value = fmt(seconds);
+    timerEl.textContent = value;
+    if (waitOverlayTimerEl) waitOverlayTimerEl.textContent = value;
+  }
+
+  function setTimerControlsDisabled(disabled) {
+    [pauseBtn, backBtn, exitBtn, toggleBtn].forEach((button) => {
+      if (button) button.disabled = disabled;
+    });
+  }
+
+  function setWaitOverlay(activeStep) {
+    const isWaiting = mode === 'transition';
+    setTimerControlsDisabled(isWaiting);
+    document.body.classList.toggle('wait-overlay-open', isWaiting);
+    if (waitOverlayEl) {
+      waitOverlayEl.hidden = !isWaiting;
+      waitOverlayEl.setAttribute('aria-hidden', String(!isWaiting));
+    }
+    if (!waitOverlayNextEl) return;
+    waitOverlayNextEl.textContent = isWaiting ? activeStep.label : '';
+  }
+
   function render() {
     const step = steps[index];
     if (!step) return;
     const activeIndex = mode === 'transition' ? nextIndex : index;
     const activeStep = steps[activeIndex] || step;
     titleEl.textContent = activeStep.label;
+    setWaitOverlay(activeStep);
     const displaySeconds = mode === 'transition' ? transitionRemaining : remaining;
-    timerEl.textContent = fmt(displaySeconds);
+    setTimerDisplay(displaySeconds);
     listItems.forEach((el, i) => {
       el.classList.toggle('active', i === activeIndex);
     });
@@ -77,13 +111,9 @@
     if (statusEl && !finished) {
       if (mode === 'transition') {
         statusLocked = false;
-        const nextLabel = steps[nextIndex]?.label || '';
-        statusEl.textContent = t('timer_next_up', {
-          label: nextLabel,
-          seconds: transitionRemaining,
-        });
+        setStatus();
       } else if (!statusLocked) {
-        statusEl.textContent = '';
+        setStatus();
       }
     }
   }
@@ -95,13 +125,13 @@
         return;
       }
       transitionRemaining -= 1;
-      timerEl.textContent = fmt(transitionRemaining);
-      if (statusEl && !finished) {
-        statusEl.textContent = t('timer_next_up', {
-          label: steps[nextIndex]?.label || '',
-          seconds: transitionRemaining,
-        });
+      if (transitionRemaining <= 0) {
+        transitionRemaining = 0;
+        setTimerDisplay(transitionRemaining);
+        beginNextStep();
+        return;
       }
+      setTimerDisplay(transitionRemaining);
       return;
     }
 
@@ -110,7 +140,7 @@
       return;
     }
     remaining -= 1;
-    timerEl.textContent = fmt(remaining);
+    setTimerDisplay(remaining);
   }
 
   function start() {
@@ -137,7 +167,7 @@
       nextIndex = 1;
       finished = false;
       statusLocked = false;
-      statusEl.textContent = '';
+      setStatus();
       render();
     }
     if (paused) start();
@@ -189,7 +219,7 @@
   async function finish() {
     pause();
     finished = true;
-    statusEl.textContent = t('timer_saving');
+    setStatus(t('timer_saving'));
     window.AudioManager?.play('finish');
     const today = dateKey(Date.now());
     const yesterday = dateKey(Date.now() - 86400000);
@@ -208,7 +238,7 @@
       return s;
     });
     const label = tPlural(updated.streak.count, 'home_day', 'home_days');
-    statusEl.textContent = t('timer_saved', { count: updated.streak.count, label });
+    setStatus(t('timer_saved', { count: updated.streak.count, label }));
     pauseBtn.textContent = t('timer_restart');
   }
 
@@ -227,7 +257,7 @@
   }
 
   if (fromAlarm && statusEl) {
-    statusEl.textContent = t('timer_reminder_triggered');
+    setStatus(t('timer_reminder_triggered'));
   }
 
   render();

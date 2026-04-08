@@ -78,6 +78,10 @@ const translations = {
     install_offline: 'You can also use the app offline; it will sync your streak the next time you’re online.',
 
     timer_focus: 'Focused time',
+    timer_next_short: 'Next',
+    timer_waiting_label: 'Waiting timer',
+    timer_wait_title: 'Get ready',
+    timer_wait_note: 'Please wait. Next section: {{label}} starts after this {{seconds}}-second countdown.',
     timer_tip: 'Tip: stay with the short timer; it keeps the flow moving.',
     timer_next_up: 'Next: {{label}} in {{seconds}}s',
     timer_start: 'Start',
@@ -182,6 +186,10 @@ const translations = {
     install_offline: 'También puedes usar la app sin conexión; se sincronizará cuando vuelvas a estar en línea.',
 
     timer_focus: 'Tiempo enfocado',
+    timer_next_short: 'Siguiente',
+    timer_waiting_label: 'Temporizador de espera',
+    timer_wait_title: 'Prepárate',
+    timer_wait_note: 'Espera por favor. Siguiente sección: {{label}} empieza después de esta cuenta regresiva de {{seconds}} segundos.',
     timer_tip: 'Consejo: quédate con el temporizador corto para mantener el ritmo.',
     timer_next_up: 'Siguiente: {{label}} en {{seconds}}s',
     timer_start: 'Iniciar',

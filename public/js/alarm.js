@@ -60,6 +60,9 @@
 
   async function trigger(reason) {
     maybeNotify();
+    if (document.visibilityState === 'visible') {
+      void window.AudioManager?.play?.('alarm');
+    }
     await window.AppStorage.updateState((s) => {
       s.settings.alarm.lastTriggeredAt = new Date().toISOString();
       return s;
