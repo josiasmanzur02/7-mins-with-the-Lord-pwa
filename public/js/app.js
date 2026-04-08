@@ -73,9 +73,9 @@ const AudioManager = (() => {
   let masterGain = null;
   let primingPromise = null;
   let mediaEl = null;
+  let assetEls = null;
   let soundUrls = null;
   let activeMediaSrc = '';
-  let assetAvailability = Object.create(null);
 
   function clampVolume(value) {
     const next = Number(value);
@@ -123,6 +123,32 @@ const AudioManager = (() => {
     element.setAttribute('playsinline', '');
     mediaEl = element;
     return mediaEl;
+  }
+
+  function ensureAssetEls() {
+    if (assetEls) return assetEls;
+    assetEls = {};
+    Object.entries(ASSET_SOUND_SRCS).forEach(([name, src]) => {
+      const element = new Audio(src);
+      element.preload = 'auto';
+      element.playsInline = true;
+      element.setAttribute('playsinline', '');
+      assetEls[name] = element;
+    });
+    return assetEls;
+  }
+
+  function ensureAssetEl(name) {
+    const elements = ensureAssetEls();
+    return elements[name] || null;
+  }
+
+  function preloadAssets() {
+    Object.values(ensureAssetEls()).forEach((element) => {
+      try {
+        element.load();
+      } catch (_) {}
+    });
   }
 
   function sampleForType(type, phase) {
@@ -246,10 +272,40 @@ const AudioManager = (() => {
       const playPromise = element.play();
       if (playPromise) await playPromise;
       element.pause();
-      element.currentTime = 0;
+      try {
+        element.currentTime = 0;
+      } catch (_) {}
       primed = true;
       return true;
     } catch (_) {
+      return false;
+    }
+  }
+
+  async function warmAssetMedia() {
+    const element = ensureAssetEl('ping');
+    if (!element) return false;
+
+    try {
+      element.pause();
+      element.muted = true;
+      element.volume = 0;
+      try {
+        element.currentTime = 0;
+      } catch (_) {}
+      const playPromise = element.play();
+      if (playPromise) await playPromise;
+      element.pause();
+      try {
+        element.currentTime = 0;
+      } catch (_) {}
+      element.muted = false;
+      element.volume = volume;
+      primed = true;
+      return true;
+    } catch (_) {
+      element.muted = false;
+      element.volume = volume;
       return false;
     }
   }
@@ -270,9 +326,11 @@ const AudioManager = (() => {
   async function prime() {
     if (primingPromise) return primingPromise;
     primingPromise = (async () => {
+      preloadAssets();
       const audio = ensureCtx();
+      const assetReady = primed ? true : await warmAssetMedia();
       const webReady = await resumeAudio(audio);
-      const mediaReady = primed ? true : await warmMediaElement();
+      const mediaReady = assetReady || primed || (await warmMediaElement());
       primed = webReady || mediaReady || primed;
       return primed;
     })().finally(() => {
@@ -325,7 +383,9 @@ const AudioManager = (() => {
         activeMediaSrc = src;
         element.load();
       } else {
-        element.currentTime = 0;
+        try {
+          element.currentTime = 0;
+        } catch (_) {}
       }
       element.volume = Math.max(0.12, Math.min(1, 0.55 + level * 0.45));
       const playPromise = element.play();
@@ -342,20 +402,32 @@ const AudioManager = (() => {
     }
   }
 
+  async function playAsset(name, level = volume) {
+    const element = ensureAssetEl(name);
+    if (!element) return false;
+
+    try {
+      element.pause();
+      element.muted = false;
+      element.volume = level;
+      try {
+        element.currentTime = 0;
+      } catch (_) {}
+      const playPromise = element.play();
+      if (playPromise) await playPromise;
+      primed = true;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   async function playMedia(name, level = volume) {
     if (name === 'silent') {
       return playSource(ensureSoundUrls().silent, level);
     }
 
-    const assetSrc = ASSET_SOUND_SRCS[name];
-    if (assetSrc && assetAvailability[name] !== false) {
-      const playedAsset = await playSource(assetSrc, level);
-      if (playedAsset) {
-        assetAvailability[name] = true;
-        return true;
-      }
-      assetAvailability[name] = false;
-    }
+    if (ASSET_SOUND_SRCS[name] && (await playAsset(name, level))) return true;
 
     const generatedSrc = ensureSoundUrls()[name];
     if (!generatedSrc) return false;
@@ -399,8 +471,12 @@ const AudioManager = (() => {
         ? clampVolume(options.volumeOverride)
         : volume;
     volume = requestedVolume;
+    preloadAssets();
+    if (await playMedia(name, requestedVolume)) {
+      void prime();
+      return true;
+    }
     await prime();
-    if (await playMedia(name, requestedVolume)) return true;
     const audio = ensureCtx();
     const ready = await resumeAudio(audio);
     if (!ready) return false;

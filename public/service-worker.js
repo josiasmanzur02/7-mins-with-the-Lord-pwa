@@ -1,10 +1,13 @@
-const CACHE_NAME = 'seven-minutes-cache-v18';
+const CACHE_NAME = 'seven-minutes-cache-v19';
 const OFFLINE_URLS = [
   '/',
   '/home',
   '/timer',
   '/settings',
   '/install',
+  '/audio/ping.mp3',
+  '/audio/finish.mp3',
+  '/audio/alarm.mp3',
   '/css/style.css',
   '/js/storage.js',
   '/js/app.js',
@@ -83,7 +86,7 @@ self.addEventListener('fetch', (event) => {
           }
           return res;
         })
-        .catch(() => caches.match('/home') || caches.match('/'));
+        .catch(() => Response.error());
     })
   );
 });
