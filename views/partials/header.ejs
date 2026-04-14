@@ -9,15 +9,17 @@
     <meta name="color-scheme" content="light dark" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="icon" href="/icons/logo.svg" type="image/svg+xml" />
+    <link rel="manifest" href="<%= asset('manifest.json') %>" />
+    <link rel="icon" href="<%= asset('icons/logo.svg') %>" type="image/svg+xml" />
     <meta name="theme-color" content="#f3f7fb" />
-    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="<%= asset('css/style.css') %>" />
     <title>7 Minutes with the Lord</title>
     <script>
       window.I18N_ALL = <%- JSON.stringify(translations) %>;
       window.I18N_LANG = '<%= lang %>';
       window.I18N = window.I18N_ALL[window.I18N_LANG] || window.I18N_ALL.en;
+      window.APP_PAGE = '<%= typeof pageName !== "undefined" ? pageName : "" %>';
+      window.APP_DEPTH = <%= typeof appDepth !== "undefined" ? appDepth : 0 %>;
     </script>
   </head>
   <body class="<%= typeof bodyClass !== 'undefined' ? bodyClass : '' %>">
@@ -29,10 +31,10 @@
         </div>
         <button class="nav-toggle" aria-label="<%= t('nav_toggle') %>">☰</button>
         <nav class="nav">
-          <a href="/home"><%= t('nav_home') %></a>
-          <a href="/timer"><%= t('nav_start') %></a>
-          <a href="/settings"><%= t('nav_settings') %></a>
-          <a href="/install"><%= t('nav_install') %></a>
+          <a href="<%= route('home') %>"><%= t('nav_home') %></a>
+          <a href="<%= route('timer') %>"><%= t('nav_start') %></a>
+          <a href="<%= route('settings') %>"><%= t('nav_settings') %></a>
+          <a href="<%= route('install') %>"><%= t('nav_install') %></a>
         </nav>
       </header>
 

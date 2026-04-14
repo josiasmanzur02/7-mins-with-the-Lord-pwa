@@ -42,11 +42,8 @@
       role="dialog"
       aria-modal="true"
       aria-label="<%= t('timer_waiting_label') %>"
-      aria-describedby="wait-overlay-next"
     >
       <div class="wait-overlay-timer"><%= `00:${String(10).padStart(2, '0')}` %></div>
-      <p class="wait-overlay-next-label"><%= t('timer_next_short') %></p>
-      <p id="wait-overlay-next" class="wait-overlay-next"></p>
     </div>
   </div>
 </div>
@@ -54,4 +51,4 @@
 <script>
   window.STEPS = <%- JSON.stringify(steps) %>;
 </script>
-<%- include('partials/footer', { pageScript: '/js/timer.js' }) %>
+<%- include('partials/footer', { pageScript: 'js/timer.js' }) %>

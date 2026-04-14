@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>7 Minutes with the Lord</title>
+    <script>
+      (function () {
+        var supported = ['en', 'es'];
+        var saved = null;
+        try {
+          saved = localStorage.getItem('sevenMinutes:lang');
+        } catch (_) {}
+        var browser = (navigator.language || 'en').slice(0, 2);
+        var lang = supported.includes(saved) ? saved : supported.includes(browser) ? browser : 'en';
+        window.location.replace(('../' + lang + '/install/'));
+      })();
+    </script>
+    <noscript>
+      <meta http-equiv="refresh" content="0; url=../en/install/" />
+    </noscript>
+  </head>
+  <body></body>
+</html>

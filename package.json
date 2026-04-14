@@ -4,6 +4,8 @@
   "description": "7 Minutes with the Lord – Express + EJS web/PWA",
   "main": "server.js",
   "scripts": {
+    "build": "npm run build:pages",
+    "build:pages": "node scripts/build-static.js",
     "dev": "nodemon server.js",
     "start": "node server.js"
   },

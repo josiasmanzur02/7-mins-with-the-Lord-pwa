@@ -1,11 +1,10 @@
       </main>
     </div>
-    <script src="/js/i18n.js"></script>
-    <script src="/js/storage.js"></script>
-    <script src="/js/app.js"></script>
-    <script src="/js/alarm.js"></script>
+    <script src="<%= asset('js/i18n.js') %>"></script>
+    <script src="<%= asset('js/storage.js') %>"></script>
+    <script src="<%= asset('js/app.js') %>"></script>
     <% if (typeof pageScript !== 'undefined' && pageScript) { %>
-      <script src="<%= pageScript %>"></script>
+      <script src="<%= asset(pageScript) %>"></script>
     <% } %>
   </body>
 </html>
